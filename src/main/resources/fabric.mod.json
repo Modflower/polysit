@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "polysit",
+  "version": "${version}",
+  "name": "Polysit",
+  "description": "Minimal sitting mod using Polymer.",
+  "authors": ["Ampflower"],
+  "icon": "pack.png",
+  "contact": {
+    "sources": "https://github.com/the-glitch-network/polysit",
+    "discord": "https://discord.gg/EmPS9y9"
+  },
+  "license": ["MPL-2.0"],
+  "environment": "*",
+  "mixins": [
+    "polysit.mixin.json"
+  ],
+  "entrypoints": {
+    "main": ["gay.ampflower.polysit.Main::main"]
+  },
+  "depends": {
+    "polymer": "*",
+    "fabric-events-interaction-v0": "*"
+  }
+}
