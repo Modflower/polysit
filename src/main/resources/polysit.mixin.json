@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "net.kjp12.polysit.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "MixinEntityTypeBootstrap",
+    "MixinLivingEntity"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

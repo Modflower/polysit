@@ -1,0 +1,58 @@
+name: Bug report
+description: Create a bug report to help us improve.
+labels: [ 'bug' ]
+
+body:
+  - type: textarea
+    attributes:
+      label: Environment
+      description: |
+        What platform & version of the mod are you using?
+
+        Example:
+          - **Minecraft**: 1.18.2 Server
+          - **Polysit**: 0.0.0-beta.5
+          - **Polymer**: 0.2.0-pre.2
+          - **Loader**: Quilt
+          - **Java**: Adoptium 17.0.3
+      value: |
+        - **Minecraft**:
+        - **Polysit**:
+        - **Polymer**:
+        - **Loader**:
+        - **Java**:
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: To reproduce
+      description: Steps to reproduce the behaviour.
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Expected results
+      description: What behaviour did you expect?
+      placeholder: e.g. To be wither immune.
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Actual results
+      description: What behaviour did you observe instead?
+      placeholder: e.g. The wither destroyed it.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Anything else?
+      description: Crash reports, server logs, screenshots and videos should go here.
+    validations:
+      required: false

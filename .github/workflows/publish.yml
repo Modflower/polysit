@@ -1,0 +1,28 @@
+name: Publish release
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 17
+      - name: Build and publish with Gradle
+        run: ./gradlew build publish
+        env:
+          BUILD_RELEASE: ${{github.event.prelease == false}}
+          MODRINTH_TOKEN: ${{secrets.MODRINTH}}
+          CHANGELOG: ${{ github.event.release.body }}
+      - name: Upload build artifacts
+        uses: AButler/upload-release-assets@v2.0
+        with:
+          files: 'build/libs/*;!build/libs/*-sources.jar;!build/libs/*-dev.jar'
+          repo-token: ${{secrets.GITHUB_TOKEN}}
