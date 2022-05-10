@@ -7,10 +7,16 @@ A polymer-based server-side sit mod for Fabric & Quilt!
 
 ## How to Use?
 
-Install Minecraft 1.18.2 and [Polymer](https://modrinth.com/mod/polymer) along with [Quilt](https://quiltmc.org/install)
-+ [QSL](https://modrinth.com/mod/qsl), or [Fabric](https://fabricmc.net/use) + [Fabric API](https://modrinth.com/mod/fabric-api), then add [Polysit](https://github.com/the-glitch-network/polysit/releases) into your mods folder.
+Requirements:
+ - Minecraft 1.18.2
+ - [Polymer](https://modrinth.com/mod/polymer)
+ - [Polysit](https://github.com/the-glitch-network/polysit/releases)
+ - One of either mod loader:
+   - [Quilt](https://quiltmc.org/install) + [QSL](https://modrinth.com/mod/qsl)
+   - [Fabric](https://fabricmc.net/use) + [Fabric API](https://modrinth.com/mod/fabric-api)
 
-Then you can right-click/use a slab or stair to sit in it.
+Install Minecraft 1.18.2, Polymer, Polysit and your mod loader of choice, then you can right-click/use a slab or stair
+to sit in it. No client mod is required, but you may install to use it in single player or with LAN.
 
 ## Building
 
