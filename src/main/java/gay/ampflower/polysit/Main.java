@@ -8,12 +8,18 @@ package gay.ampflower.polysit;// Created 2022-08-05T21:23:14
 
 import eu.pb4.polymer.api.entity.PolymerEntityUtils;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SlabBlock;
+import net.minecraft.block.StairsBlock;
+import net.minecraft.block.enums.BlockHalf;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
-import net.minecraft.tag.BlockTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.registry.Registry;
 
 /**
@@ -40,11 +46,34 @@ public class Main {
 	 */
 	public static void main() {
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
-			if (!world.isClient && hand == Hand.MAIN_HAND && player.getStackInHand(hand).isEmpty()) {
+			if (!world.isClient && hand == Hand.MAIN_HAND && player.getStackInHand(hand).isEmpty()
+					&& hitResult.getSide() != Direction.DOWN) {
 				var pos = hitResult.getBlockPos();
+				if (!world.testBlockState(pos.up(), BlockState::isAir))
+					return ActionResult.PASS;
 				var block = world.getBlockState(pos);
-				// TODO: Special handling for stairs
-				if (block.isIn(BlockTags.STAIRS) || block.isIn(BlockTags.SLABS)) {
+
+				if (block.getBlock() instanceof StairsBlock && block.get(StairsBlock.HALF) == BlockHalf.BOTTOM) {
+					var direction = block.get(StairsBlock.FACING).getOpposite();
+					// Note: Outer vs. Inner for the same side will require the same offset.
+					var corner = switch (block.get(StairsBlock.SHAPE)) {
+						case INNER_LEFT, OUTER_LEFT -> direction.rotateYCounterclockwise().getVector();
+						case INNER_RIGHT, OUTER_RIGHT -> direction.rotateYClockwise().getVector();
+						default -> Vec3i.ZERO;
+					};
+
+					double x = pos.getX() + .5D + ((direction.getOffsetX() + corner.getX()) * .2D);
+					double y = pos.getY() + .3D;
+					double z = pos.getZ() + .5D + ((direction.getOffsetZ() + corner.getZ()) * .2D);
+					var seat = new SeatEntity(world, x, y, z);
+					if (!world.spawnEntity(seat)) {
+						throw new AssertionError(seat + " invalid?!");
+					}
+					player.startRiding(seat);
+					return ActionResult.SUCCESS;
+				}
+
+				if (block.getBlock() instanceof SlabBlock && block.get(SlabBlock.TYPE) == SlabType.BOTTOM) {
 					double x = pos.getX() + .5D;
 					double y = pos.getY() + .3D;
 					double z = pos.getZ() + .5D;
