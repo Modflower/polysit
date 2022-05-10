@@ -1,3 +1,6 @@
+<img width="128" src="src/main/resources/pack.png" alt="Plymouth Utilities" align="right"/>
+<div align="left">
+
 # Polysit
 
 A polymer-based server-side sit mod for Fabric & Quilt!
@@ -15,3 +18,5 @@ Then you can right-click/use a slab or stair to sit in it.
    17 is required.
 2. Run `gradlew build`
 3. Get the build from `builds/libs`.
+
+</div>
