@@ -16,7 +16,7 @@ jobs:
         with:
           java-version: 17
       - name: Build and publish with Gradle
-        run: ./gradlew build publish
+        run: ./gradlew modrinth publish
         env:
           BUILD_RELEASE: ${{github.event.prelease == false}}
           MODRINTH_TOKEN: ${{secrets.MODRINTH}}
