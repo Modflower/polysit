@@ -1,4 +1,4 @@
-<img width="128" src="src/main/resources/pack.png" alt="Plymouth Utilities" align="right"/>
+<img width="128" src="src/main/resources/pack.png" alt="Polysit Icon" align="right"/>
 <div align="left">
 
 # Polysit
