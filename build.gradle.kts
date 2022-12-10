@@ -50,7 +50,7 @@ dependencies {
 	mappings("net.fabricmc", "yarn", yarnMappings, classifier = "v2")
 	modImplementation("net.fabricmc", "fabric-loader", loaderVersion)
 	modImplementation(fabricApi.module("fabric-events-interaction-v0", fabricApiVersion))
-	modImplementation("eu.pb4", "polymer", polymerVersion)
+	modImplementation("eu.pb4", "polymer-core", polymerVersion)
 }
 spotless {
 	java {

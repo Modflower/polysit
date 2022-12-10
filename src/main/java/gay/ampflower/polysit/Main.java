@@ -6,7 +6,7 @@
 
 package gay.ampflower.polysit;// Created 2022-08-05T21:23:14
 
-import eu.pb4.polymer.api.entity.PolymerEntityUtils;
+import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SlabBlock;
@@ -16,11 +16,12 @@ import net.minecraft.block.enums.SlabType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.registry.Registry;
 
 /**
  * Main bootstrap class for the seat, and allowing one to sit.
@@ -91,7 +92,7 @@ public class Main {
 
 	public static <T extends Entity> EntityType<T> registerEntity(String id, EntityType.Builder<T> type) {
 		var built = type.build(id);
-		Registry.register(Registry.ENTITY_TYPE, id, built);
+		Registry.register(Registries.ENTITY_TYPE, id, built);
 		PolymerEntityUtils.registerType(built);
 		return built;
 	}
