@@ -19,7 +19,8 @@
     "main": ["net.kjp12.polysit.Main::main"]
   },
   "depends": {
-    "polymer": "*",
+    "minecraft": ">=${minecraft_required}",
+    "polymer-core": "*",
     "fabric-events-interaction-v0": "*"
   }
 }

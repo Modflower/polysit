@@ -6,7 +6,7 @@
 
 package net.kjp12.polysit;// Created 2022-08-05T21:27:35
 
-import eu.pb4.polymer.api.entity.PolymerEntity;
+import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
@@ -14,6 +14,7 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
+import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -73,7 +74,7 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	 * at a block.
 	 */
 	@Override
-	public EntityType<?> getPolymerEntityType() {
+	public EntityType<?> getPolymerEntityType(ServerPlayerEntity player) {
 		return EntityType.ARMOR_STAND;
 	}
 
@@ -81,8 +82,9 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	 * Tells the client that we're a marker armor stand, and that we have no health.
 	 */
 	@Override
-	public void modifyTrackedData(List<DataTracker.Entry<?>> data, ServerPlayerEntity player) {
-		data.add(new DataTracker.Entry<>(ARMOR_STAND_FLAGS, (byte) 16));
+	public void modifyRawTrackedData(List<DataTracker.SerializedEntry<?>> data, ServerPlayerEntity player,
+			boolean initial) {
+		data.add(new DataTracker.Entry<>(ARMOR_STAND_FLAGS, (byte) 16).toSerialized());
 		// This must be manually sent as there's no other mechanism we can use to send
 		// this.
 		player.networkHandler.sendPacket(new EntityAttributesS2CPacket(getId(), MAX_HEALTH_NULL_SINGLE));
@@ -142,7 +144,7 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	}
 
 	@Override
-	public Packet<?> createSpawnPacket() {
+	public Packet<ClientPlayPacketListener> createSpawnPacket() {
 		return new EntitySpawnS2CPacket(this);
 	}
 }
