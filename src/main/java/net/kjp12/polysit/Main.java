@@ -16,7 +16,6 @@ import net.minecraft.block.enums.SlabType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -55,7 +54,7 @@ public class Main {
 	public static void main() {
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
 			if (!world.isClient && hand == Hand.MAIN_HAND
-					&& (player.isOnGround() || player.isInvulnerableTo(DamageSource.FALL))
+					&& (player.isOnGround() || player.isInvulnerableTo(player.getDamageSources().fall()))
 					&& player.getStackInHand(hand).isEmpty() && hitResult.getSide() != Direction.DOWN) {
 				var pos = hitResult.getBlockPos();
 				if (!world.testBlockState(pos.up(), BlockState::isAir))
@@ -72,7 +71,7 @@ public class Main {
 				var source = context.getSource();
 				var entity = source.getEntityOrThrow();
 
-				if (!entity.isOnGround() && !entity.isInvulnerableTo(DamageSource.FALL)) {
+				if (!entity.isOnGround() && !entity.isInvulnerableTo(entity.getDamageSources().fall())) {
 					source.sendError(Text.of("Unable to sit while falling."));
 					return 0;
 				}

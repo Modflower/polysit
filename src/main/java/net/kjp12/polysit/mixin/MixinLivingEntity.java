@@ -32,7 +32,7 @@ public abstract class MixinLivingEntity extends Entity {
 
 	@ModifyArg(method = "onDismounted", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;<init>(DDD)V"), index = 1)
 	private double modifyY(double x, double y, double z) {
-		var pos = new BlockPos(x, y, z);
+		var pos = BlockPos.ofFloored(x, y, z);
 		var block = world.getBlockState(pos);
 		if (block.isAir()) {
 			return y;
