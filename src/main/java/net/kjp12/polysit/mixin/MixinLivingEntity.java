@@ -1,4 +1,4 @@
-/* Copyright 2022 KJP12
+/* Copyright 2022 Ampflower
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
  * Prevents players from phasing through blocks, especially when the block has
  * nothing underneath.
  *
- * @author KJP12
+ * @author Ampflower
  * @since 0.0.0
  **/
 @Mixin(LivingEntity.class)

@@ -4,7 +4,7 @@
   "version": "${version}",
   "name": "Polysit",
   "description": "Minimal sitting mod using Polymer.",
-  "authors": ["KJP12"],
+  "authors": ["Ampflower"],
   "icon": "pack.png",
   "contact": {
     "sources": "https://github.com/the-glitch-network/polysit",

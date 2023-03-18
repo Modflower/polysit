@@ -1,4 +1,4 @@
-/* Copyright 2022 KJP12
+/* Copyright 2022 Ampflower
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.Mixin;
  *
  * @implNote The static block is an implicit
  *           {@code @Inject(method = "&lt;clinit&gt;", at = @At("TAIL"))}.
- * @author KJP12
+ * @author Ampflower
  * @since 0.0.0
  **/
 @Mixin(EntityType.class)

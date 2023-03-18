@@ -1,4 +1,4 @@
-/* Copyright 2022 KJP12
+/* Copyright 2022 Ampflower
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -40,7 +40,7 @@ import static net.minecraft.entity.decoration.ArmorStandEntity.ARMOR_STAND_FLAGS
  * actively ridden.</li>
  * </ul>
  *
- * @author KJP12
+ * @author Ampflower
  * @since 0.0.0
  **/
 public class SeatEntity extends Entity implements PolymerEntity {
