@@ -136,7 +136,7 @@ public class SeatEntity extends Entity implements PolymerEntity {
 		// There's absolutely no reason for this entity to even move.
 		super.tick();
 		var passenger = getFirstPassenger();
-		if (passenger == null || (((world.getTime() + hashCode()) & 31) == 0 && getBlockStateAtPos().isAir())) {
+		if (passenger == null || (((this.getWorld().getTime() + hashCode()) & 31) == 0 && getBlockStateAtPos().isAir())) {
 			discard();
 			return;
 		}

@@ -33,11 +33,11 @@ public abstract class MixinLivingEntity extends Entity {
 	@ModifyArg(method = "onDismounted", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;<init>(DDD)V"), index = 1)
 	private double modifyY(double x, double y, double z) {
 		var pos = BlockPos.ofFloored(x, y, z);
-		var block = world.getBlockState(pos);
+		var block = this.getWorld().getBlockState(pos);
 		if (block.isAir()) {
 			return y;
 		}
-		var col = pos.getY() + block.getCollisionShape(world, pos, ShapeContext.of(this)).getMax(Direction.Axis.Y);
+		var col = pos.getY() + block.getCollisionShape(this.getWorld(), pos, ShapeContext.of(this)).getMax(Direction.Axis.Y);
 		return Math.max(y, col);
 	}
 }
