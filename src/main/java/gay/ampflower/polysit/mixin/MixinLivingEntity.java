@@ -37,7 +37,8 @@ public abstract class MixinLivingEntity extends Entity {
 		if (block.isAir()) {
 			return y;
 		}
-		var col = pos.getY() + block.getCollisionShape(this.getWorld(), pos, ShapeContext.of(this)).getMax(Direction.Axis.Y);
+		var col = pos.getY()
+				+ block.getCollisionShape(this.getWorld(), pos, ShapeContext.of(this)).getMax(Direction.Axis.Y);
 		return Math.max(y, col);
 	}
 }
