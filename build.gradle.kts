@@ -13,6 +13,7 @@ plugins {
 
 val minecraftVersion: String by project
 val minecraftRequired: String by project
+val minecraftCompatible: String by project
 val yarnMappings: String by project
 val loaderVersion: String by project
 val fabricApiVersion: String by project
@@ -95,7 +96,7 @@ tasks {
 		changelog.set(System.getenv("CHANGELOG") ?: if (ref != null && ref.startsWith("refs/tags/")) "You may view the changelog at https://github.com/the-glitch-network/polysit/releases/tag/${com.google.common.net.UrlEscapers.urlFragmentEscaper().escape(ref.substring(10))}"
 		else "No changelog is available. Perhaps poke at https://github.com/the-glitch-network/polysit for a changelog?")
 		uploadFile.set(remapJar.get())
-		gameVersions.set(listOf(minecraftVersion))
+		gameVersions.set(minecraftCompatible.split(","))
 		loaders.addAll("fabric", "quilt")
 		dependencies.set(mutableListOf(
 			ModDependency("xGdtZczs", DependencyType.REQUIRED),
