@@ -6,11 +6,11 @@
 
 package gay.ampflower.polysit.mixin;// Created 2022-08-05T23:31:06
 
+import gay.ampflower.polysit.Main;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,7 +32,7 @@ public abstract class MixinLivingEntity extends Entity {
 
 	@ModifyArg(method = "onDismounted", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;<init>(DDD)V"), index = 1)
 	private double modifyY(double x, double y, double z) {
-		var pos = BlockPos.ofFloored(x, y, z);
+		var pos = Main.blockPosOfFloored(x, y, z);
 		var block = this.getWorld().getBlockState(pos);
 		if (block.isAir()) {
 			return y;

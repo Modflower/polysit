@@ -24,6 +24,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 
@@ -54,7 +55,7 @@ public class Main {
 	public static void main() {
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
 			if (!world.isClient && hand == Hand.MAIN_HAND
-					&& (player.isOnGround() || player.isInvulnerableTo(player.getDamageSources().fall()))
+					&& (player.isOnGround() || player.hasVehicle())
 					&& player.getStackInHand(hand).isEmpty() && hitResult.getSide() != Direction.DOWN) {
 				var pos = hitResult.getBlockPos();
 				if (!world.testBlockState(pos.up(), BlockState::isAir))
@@ -71,7 +72,7 @@ public class Main {
 				var source = context.getSource();
 				var entity = source.getEntityOrThrow();
 
-				if (!entity.isOnGround() && !entity.isInvulnerableTo(entity.getDamageSources().fall())) {
+				if (!entity.isOnGround() && !entity.hasVehicle()) {
 					source.sendError(Text.of("Unable to sit while falling."));
 					return 0;
 				}
@@ -161,5 +162,9 @@ public class Main {
 		Registry.register(Registries.ENTITY_TYPE, id, built);
 		PolymerEntityUtils.registerType(built);
 		return built;
+	}
+
+	public static BlockPos blockPosOfFloored(double x, double y, double z) {
+		return new BlockPos(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
 	}
 }
