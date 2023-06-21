@@ -54,8 +54,7 @@ public class Main {
 	 */
 	public static void main() {
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
-			if (!world.isClient && hand == Hand.MAIN_HAND
-					&& (player.isOnGround() || player.hasVehicle())
+			if (!world.isClient && hand == Hand.MAIN_HAND && (player.isOnGround() || player.hasVehicle())
 					&& player.getStackInHand(hand).isEmpty() && hitResult.getSide() != Direction.DOWN) {
 				var pos = hitResult.getBlockPos();
 				if (!world.testBlockState(pos.up(), BlockState::isAir))
