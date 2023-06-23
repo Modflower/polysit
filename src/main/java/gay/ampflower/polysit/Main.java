@@ -88,7 +88,8 @@ public class Main {
 				var state = world.getBlockState(pos);
 				var shape = state.getCollisionShape(world, pos, ShapeContext.of(entity));
 
-				if (state.isAir() || shape.isEmpty()) {
+				// Skip if it's not solid or taller than 1 block.
+				if (state.isAir() || shape.isEmpty() || shape.getMax(Direction.Axis.Y) > 1D) {
 					pos = pos.down();
 					state = world.getBlockState(pos);
 					shape = state.getCollisionShape(world, pos, ShapeContext.of(entity));
@@ -167,6 +168,14 @@ public class Main {
 
 			double x = pos.getX() + .5D;
 			double y = pos.getY() + .3D;
+			double z = pos.getZ() + .5D;
+			sit(world, entity, x, y, z);
+			return ActionResult.SUCCESS;
+		}
+
+		if (command && (state.getBlock() instanceof FenceBlock || state.getBlock() instanceof FenceGateBlock)) {
+			double x = pos.getX() + .5D;
+			double y = pos.getY() + .75D;
 			double z = pos.getZ() + .5D;
 			sit(world, entity, x, y, z);
 			return ActionResult.SUCCESS;
