@@ -97,7 +97,7 @@ public class Main {
 				}
 
 				double x = entity.getX();
-				double y = pos.getY() + Math.min(shape.getMax(Direction.Axis.Y), 1D) - 0.2D;
+				double y = pos.getY() + Math.min(assertFinite(shape.getMax(Direction.Axis.Y), 's'), 1D) - 0.2D;
 				double z = entity.getZ();
 
 				sit(world, entity, x, y, z);
@@ -158,6 +158,7 @@ public class Main {
 		if (!world.spawnEntity(seat)) {
 			throw new AssertionError(seat + " invalid?!");
 		}
+		assertDistance(entity, seat);
 		entity.startRiding(seat);
 	}
 
@@ -170,5 +171,29 @@ public class Main {
 
 	public static BlockPos blockPosOfFloored(double x, double y, double z) {
 		return new BlockPos(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
+	}
+
+	public static void assertDistance(Entity from, Entity to) {
+		double d = from.distanceTo(to);
+		if (assertFinite(d, 'd') > 25)
+			throw new RuntimeException(to + " out of range of " + from);
+	}
+
+	public static double assertHori(double d, char coord) {
+		if (d < -30000000 || d > 30000000)
+			throw new RuntimeException(coord + ": " + d);
+		return d;
+	}
+
+	public static double assertVert(double d, char coord) {
+		if (d < -256 || d > 512)
+			throw new RuntimeException(coord + ": " + d);
+		return d;
+	}
+
+	public static double assertFinite(double d, char coord) {
+		if (!Double.isFinite(d))
+			throw new RuntimeException(coord + ": " + d);
+		return d;
 	}
 }
