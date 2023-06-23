@@ -87,6 +87,11 @@ public class Main {
 					shape = state.getCollisionShape(world, pos, ShapeContext.of(entity));
 				}
 
+				if (state.isAir() || shape.isEmpty()) {
+					source.sendError(Text.of("It appears you're trying to sit on air."));
+					return 0;
+				}
+
 				if (sit(world, state, pos, entity, true).isAccepted()) {
 					return Command.SINGLE_SUCCESS;
 				}
