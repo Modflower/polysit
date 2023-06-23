@@ -71,7 +71,12 @@ public class Main {
 				var source = context.getSource();
 				var entity = source.getEntityOrThrow();
 
-				if (!entity.isOnGround() && !entity.hasVehicle()) {
+				if (entity.hasVehicle()) {
+					source.sendError(Text.of("You're already sitting!"));
+					return 0;
+				}
+
+				if (!entity.isOnGround()) {
 					source.sendError(Text.of("Unable to sit while falling."));
 					return 0;
 				}
