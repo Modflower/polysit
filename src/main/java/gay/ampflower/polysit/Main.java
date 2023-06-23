@@ -28,6 +28,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.NotNull;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -113,7 +114,8 @@ public class Main {
 		});
 	}
 
-	public static ActionResult sit(World world, BlockState state, BlockPos pos, Entity entity, boolean command) {
+	public static ActionResult sit(@NotNull final World world, @NotNull final BlockState state,
+			@NotNull final BlockPos pos, @NotNull final Entity entity, final boolean command) {
 		if (state.getBlock() instanceof StairsBlock && state.get(StairsBlock.HALF) == BlockHalf.BOTTOM) {
 			var direction = state.get(StairsBlock.FACING).getOpposite();
 			// Note: Outer vs. Inner for the same side will require the same offset.
