@@ -11,6 +11,7 @@ import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.block.*;
+import net.minecraft.block.enums.BedPart;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.entity.Entity;
@@ -144,8 +145,22 @@ public class Main {
 					return ActionResult.PASS;
 				}
 
+				BlockPos head;
+
+				// Get the head of the bed block to mimic vanilla.
+				if (state.get(BedBlock.PART) == BedPart.HEAD) {
+					head = pos;
+				} else {
+					head = pos.offset(state.get(BedBlock.FACING));
+					if (!world.getBlockState(head).isOf(state.getBlock())) {
+						head = null;
+					}
+				}
+
 				// Set the spawn point for the player as one would expect.
-				player.setSpawnPoint(world.getRegistryKey(), pos, player.getYaw(), false, true);
+				if (head != null) {
+					player.setSpawnPoint(world.getRegistryKey(), head, player.getYaw(), false, true);
+				}
 			}
 
 			double x = pos.getX() + .5D;
