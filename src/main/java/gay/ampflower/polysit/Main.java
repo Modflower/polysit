@@ -7,6 +7,7 @@
 package gay.ampflower.polysit;// Created 2022-08-05T21:23:14
 
 import com.mojang.brigadier.Command;
+import com.mojang.logging.LogUtils;
 import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -29,6 +30,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -39,6 +41,8 @@ import static net.minecraft.server.command.CommandManager.literal;
  * @since 0.0.0
  **/
 public class Main {
+	private static final Logger logger = LogUtils.getLogger();
+
 	/** Seat entity type. Disallows manual summoning, makes fire immune. */
 	public static EntityType<SeatEntity> SEAT = registerEntity("polysit:seat",
 			EntityType.Builder.<SeatEntity>create(SeatEntity::new, SpawnGroup.MISC).setDimensions(0, 0)
@@ -63,7 +67,14 @@ public class Main {
 					return ActionResult.PASS;
 				var block = world.getBlockState(pos);
 
-				return sit(world, block, pos, player, false);
+				try {
+					return sit(world, block, pos, player, false);
+				} catch (AssertionError error) {
+					player.sendMessage(Text.of("Assertion failed, please report to Polysit: " + error));
+					logger.warn(
+							"Assertion failed, please report to Polysit - https://github.com/Modflower/polysit/issues",
+							error);
+				}
 			}
 			return ActionResult.PASS;
 		});
@@ -100,15 +111,22 @@ public class Main {
 					return 0;
 				}
 
-				if (sit(world, state, pos, entity, true).isAccepted()) {
-					return Command.SINGLE_SUCCESS;
+				try {
+					if (sit(world, state, pos, entity, true).isAccepted()) {
+						return Command.SINGLE_SUCCESS;
+					}
+
+					double x = entity.getX();
+					double y = pos.getY() + Math.min(assertFinite(shape.getMax(Direction.Axis.Y), 's'), 1D) - 0.2D;
+					double z = entity.getZ();
+
+					sit(world, entity, x, y, z);
+				} catch (AssertionError error) {
+					source.sendError(Text.of("Assertion failed, please report to Polysit: " + error));
+					logger.warn(
+							"Assertion failed, please report to Polysit - https://github.com/Modflower/polysit/issues",
+							error);
 				}
-
-				double x = entity.getX();
-				double y = pos.getY() + Math.min(assertFinite(shape.getMax(Direction.Axis.Y), 's'), 1D) - 0.2D;
-				double z = entity.getZ();
-
-				sit(world, entity, x, y, z);
 
 				return Command.SINGLE_SUCCESS;
 			}));
