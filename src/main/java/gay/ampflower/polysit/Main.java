@@ -44,6 +44,10 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class Main {
 	private static final Logger logger = LogUtils.getLogger();
 
+	public static final double HORIZONTAL_CENTER_OFFSET = 0.5D;
+	public static final double VERTICAL_SLAB_OFFSET = 0.35D;
+	public static final double VERTICAL_FENCE_OFFSET = 0.75D;
+
 	/** Seat entity type. Disallows manual summoning, makes fire immune. */
 	public static EntityType<SeatEntity> SEAT = registerEntity("polysit:seat",
 			EntityType.Builder.<SeatEntity>create(SeatEntity::new, SpawnGroup.MISC).setDimensions(0, 0)
@@ -182,17 +186,17 @@ public class Main {
 				default -> Vec3i.ZERO;
 			};
 
-			double x = pos.getX() + .5D + ((direction.getOffsetX() + corner.getX()) * .2D);
-			double y = pos.getY() + .3D;
-			double z = pos.getZ() + .5D + ((direction.getOffsetZ() + corner.getZ()) * .2D);
+			double x = pos.getX() + HORIZONTAL_CENTER_OFFSET + ((direction.getOffsetX() + corner.getX()) * .2D);
+			double y = pos.getY() + VERTICAL_SLAB_OFFSET;
+			double z = pos.getZ() + HORIZONTAL_CENTER_OFFSET + ((direction.getOffsetZ() + corner.getZ()) * .2D);
 			sit(world, entity, x, y, z);
 			return ActionResult.SUCCESS;
 		}
 
 		if (state.getBlock() instanceof SlabBlock && state.get(SlabBlock.TYPE) == SlabType.BOTTOM) {
-			double x = pos.getX() + .5D;
-			double y = pos.getY() + .3D;
-			double z = pos.getZ() + .5D;
+			double x = pos.getX() + HORIZONTAL_CENTER_OFFSET;
+			double y = pos.getY() + VERTICAL_SLAB_OFFSET;
+			double z = pos.getZ() + HORIZONTAL_CENTER_OFFSET;
 			sit(world, entity, x, y, z);
 			return ActionResult.SUCCESS;
 		}
@@ -222,17 +226,17 @@ public class Main {
 				}
 			}
 
-			double x = pos.getX() + .5D;
-			double y = pos.getY() + .3D;
-			double z = pos.getZ() + .5D;
+			double x = pos.getX() + HORIZONTAL_CENTER_OFFSET;
+			double y = pos.getY() + VERTICAL_SLAB_OFFSET;
+			double z = pos.getZ() + HORIZONTAL_CENTER_OFFSET;
 			sit(world, entity, x, y, z);
 			return ActionResult.SUCCESS;
 		}
 
 		if (command && (state.getBlock() instanceof FenceBlock || state.getBlock() instanceof FenceGateBlock)) {
-			double x = pos.getX() + .5D;
-			double y = pos.getY() + .75D;
-			double z = pos.getZ() + .5D;
+			double x = pos.getX() + HORIZONTAL_CENTER_OFFSET;
+			double y = pos.getY() + VERTICAL_FENCE_OFFSET;
+			double z = pos.getZ() + HORIZONTAL_CENTER_OFFSET;
 			sit(world, entity, x, y, z);
 			return ActionResult.SUCCESS;
 		}
