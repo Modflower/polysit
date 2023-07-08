@@ -28,6 +28,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -60,12 +61,22 @@ public class Main {
 	 */
 	public static void main() {
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
-			if (!world.isClient && hand == Hand.MAIN_HAND && (player.isOnGround() || player.hasVehicle())
+			if (!world.isClient && hand == Hand.MAIN_HAND
+					&& (player.isOnGround() || player.hasVehicle() || player.isCreative())
 					&& player.getStackInHand(hand).isEmpty() && hitResult.getSide() != Direction.DOWN) {
 				var pos = hitResult.getBlockPos();
+				// TODO: Make this check the entire collision area where the player fits.
+				// This would accounts for Pehkui and other mods that modify the hit box.
 				if (!world.testBlockState(pos.up(), BlockState::isAir))
 					return ActionResult.PASS;
-				var block = world.getBlockState(pos);
+
+				final var block = world.getBlockState(pos);
+				final var topHeight = getTopHeight(world, block, pos, player);
+				final var relative = pos.getY() + topHeight - getEffectiveEntityY(player);
+
+				if (relative > JumpHeightUtil.maxJumpHeight(player)) {
+					return ActionResult.PASS;
+				}
 
 				try {
 					return sit(world, block, pos, player, false);
@@ -97,16 +108,16 @@ public class Main {
 				var pos = entity.getBlockPos();
 				var world = entity.getWorld();
 				var state = world.getBlockState(pos);
-				var shape = state.getCollisionShape(world, pos, ShapeContext.of(entity));
+				var topHeight = getTopHeight(world, state, pos, entity);
 
-				// Skip if it's not solid or taller than 1 block.
-				if (state.isAir() || shape.isEmpty() || shape.getMax(Direction.Axis.Y) > 1D) {
+				// Skip if it's not solid or taller than jump height.
+				if (topHeight < 0.D || topHeight > JumpHeightUtil.maxJumpHeight(entity)) {
 					pos = pos.down();
 					state = world.getBlockState(pos);
-					shape = state.getCollisionShape(world, pos, ShapeContext.of(entity));
+					topHeight = getTopHeight(world, state, pos, entity);
 				}
 
-				if (state.isAir() || shape.isEmpty()) {
+				if (topHeight < 0.D) {
 					source.sendError(Text.of("It appears you're trying to sit on air."));
 					return 0;
 				}
@@ -117,7 +128,7 @@ public class Main {
 					}
 
 					double x = entity.getX();
-					double y = pos.getY() + Math.min(assertFinite(shape.getMax(Direction.Axis.Y), 's'), 1D) - 0.2D;
+					double y = pos.getY() + assertFinite(topHeight, 's') - 0.2D;
 					double z = entity.getZ();
 
 					sit(world, entity, x, y, z);
@@ -131,6 +142,33 @@ public class Main {
 				return Command.SINGLE_SUCCESS;
 			}));
 		});
+	}
+
+	public static double getEffectiveEntityY(Entity entity) {
+		if (!entity.hasVehicle()) {
+			return entity.getY();
+		}
+
+		final var pos = entity.getBlockPos();
+		final var world = entity.getWorld();
+		final var block = world.getBlockState(pos);
+		final var height = getTopHeight(world, block, pos, entity);
+
+		return Math.max(pos.getY() + height, entity.getY());
+	}
+
+	public static double getTopHeight(BlockView world, BlockState state, BlockPos pos, Entity entity) {
+		if (state.isAir()) {
+			return -1.D;
+		}
+
+		if (state.getBlock() instanceof StairsBlock && state.get(StairsBlock.HALF) == BlockHalf.BOTTOM) {
+			return 0.5D;
+		}
+
+		final var shape = state.getCollisionShape(world, pos, ShapeContext.of(entity));
+
+		return shape.getMax(Direction.Axis.Y);
 	}
 
 	public static ActionResult sit(@NotNull final World world, @NotNull final BlockState state,

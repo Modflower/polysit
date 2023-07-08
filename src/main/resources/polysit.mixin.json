@@ -3,6 +3,7 @@
   "package": "gay.ampflower.polysit.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AccessorLivingEntity",
     "MixinEntityTypeBootstrap",
     "MixinLivingEntity",
     "MixinServerPlayerEntity"
