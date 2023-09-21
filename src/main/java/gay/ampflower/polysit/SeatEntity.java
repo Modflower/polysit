@@ -98,12 +98,18 @@ public class SeatEntity extends Entity implements PolymerEntity {
 
 	@Override
 	protected void readCustomDataFromNbt(NbtCompound nbt) {
-
+		// Avoids setting position on entity init
+		final var version = nbt.getInt(Main.VERSION_TAG_NAME);
+		if (version != Main.RUNTIME_VERSION) {
+			this.setPos(this.getX(), this.getY() + Main.delta(version), this.getZ());
+			// Required to suppress the packet
+			this.resetPosition();
+		}
 	}
 
 	@Override
 	protected void writeCustomDataToNbt(NbtCompound nbt) {
-
+		nbt.putInt(Main.VERSION_TAG_NAME, Main.RUNTIME_VERSION);
 	}
 
 	/** Only save if being ridden. */

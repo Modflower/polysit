@@ -11,6 +11,7 @@ import com.mojang.logging.LogUtils;
 import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.SharedConstants;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BedPart;
 import net.minecraft.block.enums.BlockHalf;
@@ -45,8 +46,51 @@ public class Main {
 	private static final Logger logger = LogUtils.getLogger();
 
 	public static final double HORIZONTAL_CENTER_OFFSET = 0.5D;
-	public static final double VERTICAL_SLAB_OFFSET = 0.35D;
-	public static final double VERTICAL_FENCE_OFFSET = 0.75D;
+	public static final double UPDATE_HEIGHT_OFFSET = 0.25D;
+	public static final double VERTICAL_SLAB_OFFSET;
+	public static final double VERTICAL_FENCE_OFFSET;
+
+	static final String VERSION_TAG_NAME = "polysit:runtimeVersion";
+	static final int RUNTIME_VERSION;
+	private static final double[] OFFSET_DELTA = { 0, UPDATE_HEIGHT_OFFSET };
+
+	static {
+		final var currentVersion = SharedConstants.getGameVersion().getSaveVersion().getId();
+
+		// No need to pollute the class fields.
+		final double verticalSlabOffset = 0.35D;
+		final double verticalFenceOffset = 0.75D;
+		final int updateChangingOffset = 3572; // 1.20.2-pre.1; <=23w35a are no-boots
+
+		// Adjusts offset for >1.20.2-rc.1.
+		if (currentVersion >= updateChangingOffset) {
+			VERTICAL_SLAB_OFFSET = verticalSlabOffset + UPDATE_HEIGHT_OFFSET;
+			VERTICAL_FENCE_OFFSET = verticalFenceOffset + UPDATE_HEIGHT_OFFSET;
+			RUNTIME_VERSION = 1;
+		} else {
+			VERTICAL_SLAB_OFFSET = verticalSlabOffset;
+			VERTICAL_FENCE_OFFSET = verticalFenceOffset;
+			RUNTIME_VERSION = 0;
+		}
+	}
+
+	static double delta(int runtimeVersion) {
+		if (runtimeVersion > RUNTIME_VERSION) {
+			return -sum(OFFSET_DELTA, RUNTIME_VERSION + 1, runtimeVersion);
+		}
+		if (runtimeVersion < RUNTIME_VERSION) {
+			return sum(OFFSET_DELTA, runtimeVersion + 1, RUNTIME_VERSION);
+		}
+		return 0D;
+	}
+
+	private static double sum(double[] array, int from, int to) {
+		double sum = 0D;
+		for (; from <= to; from++) {
+			sum += array[from];
+		}
+		return sum;
+	}
 
 	/** Seat entity type. Disallows manual summoning, makes fire immune. */
 	public static EntityType<SeatEntity> SEAT = registerEntity("polysit:seat",
