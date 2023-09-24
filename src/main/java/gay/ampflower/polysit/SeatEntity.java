@@ -89,7 +89,13 @@ public class SeatEntity extends Entity implements PolymerEntity {
 		data.add(new DataTracker.Entry<>(ARMOR_STAND_FLAGS, (byte) 16).toSerialized());
 		// This must be manually sent as there's no other mechanism we can use to send
 		// this.
-		player.networkHandler.sendPacket(new EntityAttributesS2CPacket(getId(), MAX_HEALTH_NULL_SINGLE));
+		if (player != null) {
+			// Really, this shouldn't be null but apparently Polymer 0.3.13+1.19.3 is
+			// slightly busted in that joining a world while sitting on a seat causes an
+			// instant crash.
+			// We can at least mitigate it here.
+			player.networkHandler.sendPacket(new EntityAttributesS2CPacket(getId(), MAX_HEALTH_NULL_SINGLE));
+		}
 	}
 
 	@Override
