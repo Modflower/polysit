@@ -7,7 +7,6 @@ plugins {
 	id("fabric-loom")
 	id("com.diffplug.spotless")
 	id("com.modrinth.minotaur")
-	id("io.github.juuxel.loom-quiltflower")
 	`maven-publish`
 }
 
