@@ -18,6 +18,7 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.Collection;
@@ -150,12 +151,24 @@ public class SeatEntity extends Entity implements PolymerEntity {
 		// There's absolutely no reason for this entity to even move.
 		super.tick();
 		var passenger = getFirstPassenger();
-		if (passenger == null
-				|| (((this.getWorld().getTime() + hashCode()) & 31) == 0 && getBlockStateAtPos().isAir())) {
+		if (passenger == null || isDiscardable()) {
 			discard();
 			return;
 		}
 		setYaw(passenger.getYaw());
+	}
+
+	private boolean isDiscardable() {
+		final var world = this.getWorld();
+		if (((world.getTime() + hashCode()) & 31) != 0) {
+			return false;
+		}
+
+		return world.getBlockState(getAdjustedPos()).isAir();
+	}
+
+	private BlockPos getAdjustedPos() {
+		return Main.blockPosOfFloored(getPos().add(0, Main.VERTICAL_CHECK_OFFSET, 0));
 	}
 
 	@Override

@@ -25,10 +25,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
@@ -49,6 +46,8 @@ public class Main {
 	public static final double UPDATE_HEIGHT_OFFSET = 0.25D;
 	public static final double VERTICAL_SLAB_OFFSET;
 	public static final double VERTICAL_FENCE_OFFSET;
+	public static final double VERTICAL_SOLID_OFFSET;
+	public static final double VERTICAL_CHECK_OFFSET;
 
 	static final String VERSION_TAG_NAME = "polysit:runtimeVersion";
 	static final int RUNTIME_VERSION;
@@ -58,6 +57,7 @@ public class Main {
 		final var currentVersion = SharedConstants.getGameVersion().getSaveVersion().getId();
 
 		// No need to pollute the class fields.
+		final double verticalSolidOffset = -0.20D;
 		final double verticalSlabOffset = 0.35D;
 		final double verticalFenceOffset = 0.75D;
 		final int updateChangingOffset = 3572; // 1.20.2-pre.1; <=23w35a are no-boots
@@ -66,10 +66,14 @@ public class Main {
 		if (currentVersion >= updateChangingOffset) {
 			VERTICAL_SLAB_OFFSET = verticalSlabOffset + UPDATE_HEIGHT_OFFSET;
 			VERTICAL_FENCE_OFFSET = verticalFenceOffset + UPDATE_HEIGHT_OFFSET;
+			VERTICAL_SOLID_OFFSET = verticalSolidOffset + UPDATE_HEIGHT_OFFSET;
+			VERTICAL_CHECK_OFFSET = -UPDATE_HEIGHT_OFFSET;
 			RUNTIME_VERSION = 1;
 		} else {
 			VERTICAL_SLAB_OFFSET = verticalSlabOffset;
 			VERTICAL_FENCE_OFFSET = verticalFenceOffset;
+			VERTICAL_SOLID_OFFSET = verticalSolidOffset;
+			VERTICAL_CHECK_OFFSET = 0;
 			RUNTIME_VERSION = 0;
 		}
 	}
@@ -153,6 +157,11 @@ public class Main {
 					return 0;
 				}
 
+				if (entity.isInSwimmingPose()) {
+					source.sendError(Text.of("A lil' cramped here to sit."));
+					return 0;
+				}
+
 				var pos = entity.getBlockPos();
 				var world = entity.getWorld();
 				var state = world.getBlockState(pos);
@@ -176,7 +185,7 @@ public class Main {
 					}
 
 					double x = entity.getX();
-					double y = pos.getY() + assertFinite(topHeight, 's') - 0.2D;
+					double y = pos.getY() + assertFinite(topHeight, 's') + VERTICAL_SOLID_OFFSET;
 					double z = entity.getZ();
 
 					sit(world, entity, x, y, z);
@@ -306,6 +315,10 @@ public class Main {
 
 	public static BlockPos blockPosOfFloored(double x, double y, double z) {
 		return new BlockPos(MathHelper.floor(x), MathHelper.floor(y), MathHelper.floor(z));
+	}
+
+	public static BlockPos blockPosOfFloored(Vec3d vec3d) {
+		return blockPosOfFloored(vec3d.x, vec3d.y, vec3d.z);
 	}
 
 	public static void assertDistance(Entity from, Entity to) {
