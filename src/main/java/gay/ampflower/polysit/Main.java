@@ -98,7 +98,7 @@ public class Main {
 
 	/** Seat entity type. Disallows manual summoning, makes fire immune. */
 	public static EntityType<SeatEntity> SEAT = registerEntity("polysit:seat",
-			EntityType.Builder.<SeatEntity>create(SeatEntity::new, SpawnGroup.MISC).setDimensions(0, 0)
+			EntityType.Builder.<SeatEntity>create(SeatEntity::new, SpawnGroup.MISC).dimensions(0, 0)
 					.maxTrackingRange(10).disableSummon().makeFireImmune());
 
 	/**

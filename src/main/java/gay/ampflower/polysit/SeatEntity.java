@@ -13,10 +13,7 @@ import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -100,7 +97,7 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	}
 
 	@Override
-	protected void initDataTracker() {
+	protected void initDataTracker(final DataTracker.Builder builder) {
 	}
 
 	@Override
@@ -169,10 +166,5 @@ public class SeatEntity extends Entity implements PolymerEntity {
 
 	private BlockPos getAdjustedPos() {
 		return Main.blockPosOfFloored(getPos().add(0, Main.VERTICAL_CHECK_OFFSET, 0));
-	}
-
-	@Override
-	public Packet<ClientPlayPacketListener> createSpawnPacket() {
-		return new EntitySpawnS2CPacket(this);
 	}
 }
