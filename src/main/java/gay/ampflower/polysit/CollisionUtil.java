@@ -78,7 +78,7 @@ public final class CollisionUtil {
 
 		for (int i = 1; i < dimensions.length; i++) {
 			final var comparison = dimensions[i];
-			if (comparison.height < min.height && comparison.width <= min.width) {
+			if (comparison.height() < min.height() && comparison.width() <= min.width()) {
 				min = comparison;
 			}
 		}
@@ -96,7 +96,7 @@ public final class CollisionUtil {
 		EntityPose fittingPose = null;
 
 		for (final var pose : poses) {
-			final var poseHeight = entity.getDimensions(pose).height;
+			final var poseHeight = entity.getDimensions(pose).height();
 			if (poseHeight < maxHeight && poseHeight > height) {
 				height = poseHeight;
 				fittingPose = pose;
@@ -137,7 +137,7 @@ public final class CollisionUtil {
 		// Pehkui workaround - requires a vehicle to get the correct offset.
 		// As the seat in question is the vehicle, it'll always be correct.
 		accessor.setVehicle(seat);
-		final double height = entity.getHeight() + entity.getRidingOffset(seat);
+		final double height = entity.getHeight() - entity.getVehicleAttachmentPos(seat).getY();
 		accessor.setVehicle(prevVehicle);
 		entity.setPose(prevPose);
 
