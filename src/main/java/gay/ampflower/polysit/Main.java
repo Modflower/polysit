@@ -154,8 +154,8 @@ public class Main {
 				var entity = source.getEntityOrThrow();
 
 				if (entity.hasVehicle()) {
-					source.sendError(Text.of("You're already sitting!"));
-					return 0;
+					entity.stopRiding();
+					return Command.SINGLE_SUCCESS;
 				}
 
 				if (!entity.isOnGround()) {
