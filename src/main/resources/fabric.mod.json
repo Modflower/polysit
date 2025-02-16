@@ -19,7 +19,7 @@
     "main": ["gay.ampflower.polysit.Main::main"]
   },
   "depends": {
-    "minecraft": ">=${minecraft_required}",
+    "minecraft": "${minecraft_required}",
     "polymer-core": "*",
     "fabric-events-interaction-v0": "*"
   }
