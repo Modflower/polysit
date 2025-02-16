@@ -16,7 +16,8 @@
     "polysit.mixin.json"
   ],
   "entrypoints": {
-    "main": ["gay.ampflower.polysit.Main::main"]
+    "main": ["gay.ampflower.polysit.Main::main"],
+    "client": ["gay.ampflower.polysit.Client"]
   },
   "depends": {
     "minecraft": "${minecraft_required}",
