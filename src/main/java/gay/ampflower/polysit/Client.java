@@ -13,6 +13,8 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.List;
+
 /**
  * @author Ampflower
  * @since 0.7.1
@@ -29,7 +31,7 @@ public class Client implements ClientModInitializer {
 			while (sitBinding.wasPressed()) {
 				final var play = client.getNetworkHandler();
 
-				if (play != null) {
+				if (play != null && play.getCommandDispatcher().findNode(List.of("sit")) != null) {
 					play.sendCommand("sit");
 				}
 			}
