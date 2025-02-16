@@ -122,6 +122,14 @@ public final class CollisionUtil {
 				.max().orElse(Double.NEGATIVE_INFINITY);
 	}
 
+	public static boolean isClear(final Entity entity, final double seatX, final double seatY, final double seatZ,
+			double minY) {
+		final double maxY = entity.getHeight() - entity.getHeightOffset();
+		final var box = box(seatX, minY, seatZ, entity.getWidth(), seatY + maxY);
+
+		return !entity.getWorld().getBlockCollisions(entity, box).iterator().hasNext();
+	}
+
 	public static Box box(double x, double y, double z, double w, double my) {
 		w /= 2;
 		return new Box(x - w, y, z - w, x + w, my, z + w);

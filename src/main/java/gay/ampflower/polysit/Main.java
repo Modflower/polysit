@@ -127,10 +127,6 @@ public class Main {
 					&& (player.isOnGround() || player.hasVehicle() || player.isCreative())
 					&& player.getStackInHand(hand).isEmpty() && hitResult.getSide() != Direction.DOWN) {
 				var pos = hitResult.getBlockPos();
-				// TODO: Make this check the entire collision area where the player fits.
-				// This would accounts for Pehkui and other mods that modify the hit box.
-				if (!world.testBlockState(pos.up(), BlockState::isAir))
-					return ActionResult.PASS;
 
 				final var block = world.getBlockState(pos);
 				final var topHeight = getTopHeight(world, block, pos, player);
@@ -141,7 +137,7 @@ public class Main {
 				}
 
 				try {
-					return sit(world, block, pos, player, false);
+					return sit(world, block, pos, player, topHeight, false);
 				} catch (AssertionError error) {
 					player.sendMessage(Text.of("Assertion failed, please report to Polysit: " + error));
 					logger.warn(
@@ -190,15 +186,19 @@ public class Main {
 				}
 
 				try {
-					if (sit(world, state, pos, entity, true).isAccepted()) {
+					if (sit(world, state, pos, entity, topHeight, true).isAccepted()) {
 						return Command.SINGLE_SUCCESS;
 					}
 
+					double blockY = pos.getY() + assertFinite(topHeight, 's');
+
 					double x = entity.getX();
-					double y = pos.getY() + assertFinite(topHeight, 's') + VERTICAL_SOLID_OFFSET;
+					double y = blockY + VERTICAL_SOLID_OFFSET;
 					double z = entity.getZ();
 
-					sit(world, entity, x, y, z);
+					if (sit(world, entity, x, y, z, blockY).isAccepted()) {
+						return Command.SINGLE_SUCCESS;
+					}
 				} catch (AssertionError error) {
 					source.sendError(Text.of("Assertion failed, please report to Polysit: " + error));
 					logger.warn(
@@ -206,7 +206,9 @@ public class Main {
 							error);
 				}
 
-				return Command.SINGLE_SUCCESS;
+				source.sendError(Text.of("You can't sit here, your seat is obstructed."));
+
+				return 0;
 			}));
 		});
 	}
@@ -229,17 +231,13 @@ public class Main {
 			return -1.D;
 		}
 
-		if (state.getBlock() instanceof StairsBlock && state.get(StairsBlock.HALF) == BlockHalf.BOTTOM) {
-			return 0.5D;
-		}
-
-		final var shape = state.getCollisionShape(world, pos, ShapeContext.of(entity));
-
-		return shape.getMax(Direction.Axis.Y);
+		return state.getCollisionShape(world, pos, ShapeContext.of(entity)).getMax(Direction.Axis.Y);
 	}
 
 	public static ActionResult sit(@NotNull final World world, @NotNull final BlockState state,
-			@NotNull final BlockPos pos, @NotNull final Entity entity, final boolean command) {
+			@NotNull final BlockPos pos, @NotNull final Entity entity, final double topHeight, final boolean command) {
+		final double minY = pos.getY() + topHeight;
+
 		if (state.getBlock() instanceof StairsBlock && state.get(StairsBlock.HALF) == BlockHalf.BOTTOM) {
 			var direction = state.get(StairsBlock.FACING).getOpposite();
 			// Note: Outer vs. Inner for the same side will require the same offset.
@@ -252,16 +250,14 @@ public class Main {
 			double x = pos.getX() + HORIZONTAL_CENTER_OFFSET + ((direction.getOffsetX() + corner.getX()) * .2D);
 			double y = pos.getY() + VERTICAL_SLAB_OFFSET;
 			double z = pos.getZ() + HORIZONTAL_CENTER_OFFSET + ((direction.getOffsetZ() + corner.getZ()) * .2D);
-			sit(world, entity, x, y, z);
-			return ActionResult.SUCCESS;
+			return sit(world, entity, x, y, z, minY);
 		}
 
 		if (state.getBlock() instanceof SlabBlock && state.get(SlabBlock.TYPE) == SlabType.BOTTOM) {
 			double x = pos.getX() + HORIZONTAL_CENTER_OFFSET;
 			double y = pos.getY() + VERTICAL_SLAB_OFFSET;
 			double z = pos.getZ() + HORIZONTAL_CENTER_OFFSET;
-			sit(world, entity, x, y, z);
-			return ActionResult.SUCCESS;
+			return sit(world, entity, x, y, z, minY);
 		}
 
 		if (state.getBlock() instanceof BedBlock && world.isDay()) {
@@ -292,28 +288,32 @@ public class Main {
 			double x = pos.getX() + HORIZONTAL_CENTER_OFFSET;
 			double y = pos.getY() + VERTICAL_SLAB_OFFSET;
 			double z = pos.getZ() + HORIZONTAL_CENTER_OFFSET;
-			sit(world, entity, x, y, z);
-			return ActionResult.SUCCESS;
+			return sit(world, entity, x, y, z, minY);
 		}
 
 		if (command && (state.getBlock() instanceof FenceBlock || state.getBlock() instanceof FenceGateBlock)) {
 			double x = pos.getX() + HORIZONTAL_CENTER_OFFSET;
 			double y = pos.getY() + VERTICAL_FENCE_OFFSET;
 			double z = pos.getZ() + HORIZONTAL_CENTER_OFFSET;
-			sit(world, entity, x, y, z);
-			return ActionResult.SUCCESS;
+			return sit(world, entity, x, y, z, minY);
 		}
 
 		return ActionResult.PASS;
 	}
 
-	public static void sit(World world, Entity entity, double x, double y, double z) {
-		var seat = new SeatEntity(world, x, y, z);
+	public static ActionResult sit(World world, Entity entity, double seatX, double seatY, double seatZ, double minY) {
+		if (!CollisionUtil.isClear(entity, seatX, seatY, seatZ, minY)) {
+			return ActionResult.PASS;
+		}
+
+		var seat = new SeatEntity(world, seatX, seatY, seatZ);
 		if (!world.spawnEntity(seat)) {
 			throw new AssertionError(seat + " invalid?!");
 		}
 		assertDistance(entity, seat);
 		entity.startRiding(seat);
+
+		return ActionResult.SUCCESS;
 	}
 
 	public static <T extends Entity> EntityType<T> registerEntity(String id, EntityType.Builder<T> type) {
