@@ -15,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.util.stream.StreamSupport;
+
 /**
  * Checks the collision of the player in question
  *
@@ -107,6 +109,22 @@ public final class CollisionUtil {
 		}
 
 		return fittingPose;
+	}
+
+	public static double ground(final Entity entity) {
+		final double maxY = entity.getY();
+		final double minY = maxY - JumpHeightUtil.maxJumpHeight(entity);
+
+		final var box = box(entity.getX(), minY, entity.getZ(), entity.getWidth(), maxY);
+
+		return StreamSupport.stream(entity.getWorld().getBlockCollisions(entity, box).spliterator(), true)
+				.flatMap(shape -> shape.getBoundingBoxes().stream()).filter(box::intersects).mapToDouble(b -> b.maxY)
+				.max().orElse(Double.NEGATIVE_INFINITY);
+	}
+
+	public static Box box(double x, double y, double z, double w, double my) {
+		w /= 2;
+		return new Box(x - w, y, z - w, x + w, my, z + w);
 	}
 
 	public record FittingPosition(double y, EntityPose pose) {
