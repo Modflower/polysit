@@ -12,10 +12,13 @@ import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.shape.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.util.Iterator;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -30,44 +33,35 @@ public final class CollisionUtil {
 	public static FittingPosition adjustFit(final Entity entity, double x, double y, double z) {
 		// The entity in question shouldn't be able to be placed beyond their jump
 		// height.
-		double max = y + JumpHeightUtil.maxJumpHeight(entity);
-		double maxFit = Double.POSITIVE_INFINITY;
+		double max = y + JumpHeightUtil.maxJumpHeight(entity) + entity.getHeight();
 		double min = y;
 
-		logger.debug("{} => [{}, {}] @ ({}, {}, {})", entity, min, max, x, y, z);
-
 		Box box = getSmallestPose(entity, x, y, z);
-		final var collisions = entity.getWorld().getBlockCollisions(entity, box);
+		Iterator<Box> itr = collisionBoxStream(entity, box.withMaxY(max)).iterator();
 
-		for (final var collision : collisions) {
-			for (final var bound : collision.getBoundingBoxes()) {
-				if (!bound.intersects(box)) {
-					logger.debug("Skipping box {} as unimportant to {}'s position", bound, entity);
-					continue;
-				}
-				if (bound.minY > box.minY && bound.maxY > box.maxY) {
-					maxFit = Math.min(maxFit, bound.minY);
-					// TODO: Verify that this would work in most cases.
-					// It does seem to in limited testing.
-					logger.debug("Skipping box {} as above {} for {}", bound, box, entity);
-					continue;
-				}
-				if (bound.maxY > min && bound.maxY < max) {
-					box = box.offset(0, bound.maxY - min, 0);
-					min = bound.maxY;
-				}
+		while (itr.hasNext()) {
+			final Box bound = itr.next();
+			if (!bound.intersects(box)) {
+				max = Math.min(max, bound.minY);
+				continue;
 			}
+			box = box.offset(0, bound.maxY - min, 0);
+			min = bound.maxY;
 		}
 
-		return new FittingPosition(min, getLargestFittingPose(entity, maxFit - min));
+		return new FittingPosition(min, getLargestFittingPose(entity, max - min));
 	}
 
 	public static Box getSmallestPose(Entity entity, double x, double y, double z) {
+		return getSmallestPose(entity).getBoxAt(x, y, z);
+	}
+
+	public static EntityDimensions getSmallestPose(Entity entity) {
 		final var standing = entity.getDimensions(entity.getPose());
 		final var sneaking = entity.getDimensions(EntityPose.CROUCHING);
 		final var swimming = entity.getDimensions(EntityPose.SWIMMING);
 
-		return smallest(standing, sneaking, swimming).getBoxAt(x, y, z);
+		return smallest(standing, sneaking, swimming);
 	}
 
 	public static EntityPose getLargestFittingPose(Entity entity, double y) {
@@ -84,7 +78,7 @@ public final class CollisionUtil {
 
 		for (int i = 1; i < dimensions.length; i++) {
 			final var comparison = dimensions[i];
-			if (comparison.height < min.height && comparison.width < min.width) {
+			if (comparison.height < min.height && comparison.width <= min.width) {
 				min = comparison;
 			}
 		}
@@ -118,9 +112,7 @@ public final class CollisionUtil {
 
 		final var box = box(entity.getX(), minY, entity.getZ(), entity.getWidth(), maxY);
 
-		return StreamSupport.stream(entity.getWorld().getBlockCollisions(entity, box).spliterator(), true)
-				.flatMap(shape -> shape.getBoundingBoxes().stream()).filter(box::intersects).mapToDouble(b -> b.maxY)
-				.max().orElse(Double.NEGATIVE_INFINITY);
+		return collisionBoxStream(entity, box).mapToDouble(b -> b.maxY).max().orElse(Double.NEGATIVE_INFINITY);
 	}
 
 	public static boolean isClear(final Entity entity, final double seatX, final double seatY, final double seatZ,
@@ -128,7 +120,7 @@ public final class CollisionUtil {
 		final double maxY = getEffectiveSittingHeight(entity);
 		final var box = box(seatX, minY, seatZ, entity.getWidth(), seatY + maxY);
 
-		return !entity.getWorld().getBlockCollisions(entity, box).iterator().hasNext();
+		return !collisions(entity, box).iterator().hasNext();
 	}
 
 	public static Box box(double x, double y, double z, double w, double my) {
@@ -141,11 +133,23 @@ public final class CollisionUtil {
 
 		final float scale = entity instanceof LivingEntity living ? living.getScaleFactor() : 1.f;
 
-		if(height <= 1.5F) {
+		if (height <= 1.5F) {
 			return height * scale;
 		}
 
-		return (height - (float)Main.VERTICAL_SLAB_OFFSET) * scale;
+		return (height - (float) Main.VERTICAL_SLAB_OFFSET) * scale;
+	}
+
+	private static Stream<Box> collisionBoxStream(Entity entity, Box box) {
+		return collisionStream(entity, box).flatMap(voxel -> voxel.getBoundingBoxes().stream()).filter(box::intersects);
+	}
+
+	private static Stream<VoxelShape> collisionStream(Entity entity, Box box) {
+		return StreamSupport.stream(entity.getWorld().getBlockCollisions(entity, box).spliterator(), false);
+	}
+
+	private static Iterable<VoxelShape> collisions(Entity entity, Box box) {
+		return entity.getWorld().getBlockCollisions(entity, box);
 	}
 
 	public record FittingPosition(double y, EntityPose pose) {
