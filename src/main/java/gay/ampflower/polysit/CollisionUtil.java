@@ -10,7 +10,6 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.shape.VoxelShape;
 import org.jetbrains.annotations.NotNull;
@@ -115,10 +114,9 @@ public final class CollisionUtil {
 		return collisionBoxStream(entity, box).mapToDouble(b -> b.maxY).max().orElse(Double.NEGATIVE_INFINITY);
 	}
 
-	public static boolean isClear(final Entity entity, final double seatX, final double seatY, final double seatZ,
-			double minY) {
-		final double maxY = getEffectiveSittingHeight(entity);
-		final var box = box(seatX, minY, seatZ, entity.getWidth(), seatY + maxY);
+	public static boolean isClear(final Entity entity, final Entity seat, final double minY) {
+		final double maxY = getEffectiveSittingHeight(entity, seat);
+		final var box = box(seat.getX(), minY, seat.getZ(), entity.getWidth(), seat.getY() + maxY);
 
 		return !collisions(entity, box).iterator().hasNext();
 	}
@@ -128,16 +126,15 @@ public final class CollisionUtil {
 		return new Box(x - w, y, z - w, x + w, my, z + w);
 	}
 
-	private static float getEffectiveSittingHeight(final Entity entity) {
-		final float height = entity.getDimensions(EntityPose.SITTING).height;
+	private static double getEffectiveSittingHeight(final Entity entity, final Entity seat) {
+		// Funny catch: The entity already needs to be in sitting/standing pose for
+		// getVehicleAttachmentPos to behave correctly.
+		final var tmp = entity.getPose();
+		entity.setPose(EntityPose.SITTING);
+		final double height = entity.getHeight() + entity.getHeightOffset();
+		entity.setPose(tmp);
 
-		final float scale = entity instanceof LivingEntity living ? living.getScaleFactor() : 1.f;
-
-		if (height <= 1.5F) {
-			return height * scale;
-		}
-
-		return (height - (float) Main.VERTICAL_SLAB_OFFSET) * scale;
+		return height;
 	}
 
 	private static Stream<Box> collisionBoxStream(Entity entity, Box box) {

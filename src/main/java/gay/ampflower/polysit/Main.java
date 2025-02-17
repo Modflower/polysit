@@ -297,14 +297,17 @@ public class Main {
 	}
 
 	public static ActionResult sit(World world, Entity entity, double seatX, double seatY, double seatZ, double minY) {
-		if (!CollisionUtil.isClear(entity, seatX, seatY, seatZ, minY)) {
+		var seat = new SeatEntity(world, seatX, seatY, seatZ);
+
+		if (!CollisionUtil.isClear(entity, seat, minY)) {
+			seat.discard();
 			return ActionResult.PASS;
 		}
 
-		var seat = new SeatEntity(world, seatX, seatY, seatZ);
 		if (!world.spawnEntity(seat)) {
 			throw new AssertionError(seat + " invalid?!");
 		}
+
 		assertDistance(entity, seat);
 		entity.startRiding(seat);
 
