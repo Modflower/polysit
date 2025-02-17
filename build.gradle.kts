@@ -98,8 +98,7 @@ tasks {
 		loaders.addAll("fabric", "quilt")
 		dependencies.set(mutableListOf(
 			ModDependency("xGdtZczs", DependencyType.REQUIRED),
-			ModDependency("P7dR8mSH", DependencyType.OPTIONAL),
-			ModDependency("qvIfYCYJ", DependencyType.OPTIONAL)
+			ModDependency("P7dR8mSH", DependencyType.REQUIRED)
 		))
 	}
 }
