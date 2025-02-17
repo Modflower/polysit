@@ -15,10 +15,13 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
+import xyz.nucleoid.packettweaker.PacketContext;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -45,7 +48,7 @@ import static net.minecraft.entity.decoration.ArmorStandEntity.ARMOR_STAND_FLAGS
  **/
 public class SeatEntity extends Entity implements PolymerEntity {
 	private static final EntityAttributeInstance MAX_HEALTH_NULL = new EntityAttributeInstance(
-			EntityAttributes.GENERIC_MAX_HEALTH, discard -> {
+			EntityAttributes.MAX_HEALTH, discard -> {
 			});
 	private static final Collection<EntityAttributeInstance> MAX_HEALTH_NULL_SINGLE = Collections
 			.singleton(MAX_HEALTH_NULL);
@@ -72,7 +75,7 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	 * at a block.
 	 */
 	@Override
-	public EntityType<?> getPolymerEntityType(ServerPlayerEntity player) {
+	public EntityType<?> getPolymerEntityType(final PacketContext context) {
 		return EntityType.ARMOR_STAND;
 	}
 
@@ -154,13 +157,19 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	}
 
 	@Override
-	public boolean damage(final DamageSource source, final float amount) {
-		if (isInvulnerableTo(source)) {
+	public boolean damage(final ServerWorld world, final DamageSource source, final float amount) {
+		if (!source.isSourceCreativePlayer() && !source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			return false;
 		}
 
 		this.remove(RemovalReason.KILLED);
 		return true;
+	}
+
+	@Override
+	public void onExplodedBy(@Nullable final Entity entity) {
+		// Allows the seat to be destroyed by TNT.
+		this.remove(RemovalReason.KILLED);
 	}
 
 	protected boolean isDiscardable() {
