@@ -128,6 +128,10 @@ public class Main {
 					&& player.getStackInHand(hand).isEmpty() && hitResult.getSide() != Direction.DOWN) {
 				var pos = hitResult.getBlockPos();
 
+				if (hitResult.squaredDistanceTo(player) > 5 * 5) {
+					return ActionResult.PASS;
+				}
+
 				final var block = world.getBlockState(pos);
 				final var topHeight = getTopHeight(world, block, pos, player);
 				final var relative = pos.getY() + topHeight - getEffectiveEntityY(player);
@@ -136,14 +140,7 @@ public class Main {
 					return ActionResult.PASS;
 				}
 
-				try {
-					return sit(world, block, pos, player, topHeight, false);
-				} catch (AssertionError error) {
-					player.sendMessage(Text.of("Assertion failed, please report to Polysit: " + error));
-					logger.warn(
-							"Assertion failed, please report to Polysit - https://github.com/Modflower/polysit/issues",
-							error);
-				}
+				return sit(world, block, pos, player, topHeight, false);
 			}
 			return ActionResult.PASS;
 		});
@@ -180,25 +177,18 @@ public class Main {
 					return 0;
 				}
 
-				try {
-					if (sit(world, state, pos, entity, topHeight, true).isAccepted()) {
-						return Command.SINGLE_SUCCESS;
-					}
+				if (sit(world, state, pos, entity, topHeight, true).isAccepted()) {
+					return Command.SINGLE_SUCCESS;
+				}
 
-					double blockY = pos.getY() + assertFinite(topHeight, 's');
+				double blockY = pos.getY() + topHeight;
 
-					double x = entity.getX();
-					double y = blockY + VERTICAL_SOLID_OFFSET;
-					double z = entity.getZ();
+				double x = entity.getX();
+				double y = blockY + VERTICAL_SOLID_OFFSET;
+				double z = entity.getZ();
 
-					if (sit(world, entity, x, y, z, blockY).isAccepted()) {
-						return Command.SINGLE_SUCCESS;
-					}
-				} catch (AssertionError error) {
-					source.sendError(Text.of("Assertion failed, please report to Polysit: " + error));
-					logger.warn(
-							"Assertion failed, please report to Polysit - https://github.com/Modflower/polysit/issues",
-							error);
+				if (sit(world, entity, x, y, z, blockY).isAccepted()) {
+					return Command.SINGLE_SUCCESS;
 				}
 
 				source.sendError(Text.of("You can't sit here, your seat is obstructed."));
@@ -305,10 +295,10 @@ public class Main {
 		}
 
 		if (!world.spawnEntity(seat)) {
-			throw new AssertionError(seat + " invalid?!");
+			seat.discard();
+			return ActionResult.FAIL;
 		}
 
-		assertDistance(entity, seat);
 		entity.startRiding(seat);
 
 		return ActionResult.SUCCESS;
@@ -327,29 +317,5 @@ public class Main {
 
 	public static BlockPos blockPosOfFloored(Vec3d vec3d) {
 		return blockPosOfFloored(vec3d.x, vec3d.y, vec3d.z);
-	}
-
-	public static void assertDistance(Entity from, Entity to) {
-		double d = from.distanceTo(to);
-		if (assertFinite(d, 'd') > 25)
-			throw new RuntimeException(to + " out of range of " + from);
-	}
-
-	public static double assertHori(double d, char coord) {
-		if (d < -30000000 || d > 30000000)
-			throw new RuntimeException(coord + ": " + d);
-		return d;
-	}
-
-	public static double assertVert(double d, char coord) {
-		if (d < -256 || d > 512)
-			throw new RuntimeException(coord + ": " + d);
-		return d;
-	}
-
-	public static double assertFinite(double d, char coord) {
-		if (!Double.isFinite(d))
-			throw new RuntimeException(coord + ": " + d);
-		return d;
 	}
 }

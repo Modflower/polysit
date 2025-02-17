@@ -66,12 +66,8 @@ public class SeatEntity extends Entity implements PolymerEntity {
 
 	public SeatEntity(World world, double x, double y, double z) {
 		this(Main.SEAT, world);
-		// Assertions present to crash the server
-		this.setPosition(Main.assertFinite(Main.assertHori(x, 'x'), 'x'),
-				Main.assertFinite(Main.assertVert(y, 'y'), 'y'), Main.assertFinite(Main.assertHori(z, 'z'), 'z'));
-		this.prevX = x;
-		this.prevY = y;
-		this.prevZ = z;
+		this.setPosition(x, y, z);
+		this.resetPosition();
 	}
 
 	/**
