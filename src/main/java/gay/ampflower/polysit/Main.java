@@ -27,10 +27,13 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -309,8 +312,9 @@ public class Main {
 	}
 
 	public static <T extends Entity> EntityType<T> registerEntity(String id, EntityType.Builder<T> type) {
-		var built = type.build(id);
-		Registry.register(Registries.ENTITY_TYPE, id, built);
+		final var identifier = Identifier.of(id);
+		final var built = type.build(RegistryKey.of(RegistryKeys.ENTITY_TYPE, identifier));
+		Registry.register(Registries.ENTITY_TYPE, identifier, built);
 		PolymerEntityUtils.registerType(built);
 		return built;
 	}
