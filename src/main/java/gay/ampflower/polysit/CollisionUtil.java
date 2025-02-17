@@ -136,18 +136,10 @@ public final class CollisionUtil {
 		entity.setPose(EntityPose.SITTING);
 		// Pehkui workaround - requires a vehicle to get the correct offset.
 		// As the seat in question is the vehicle, it'll always be correct.
-		accessor.setVehicle(null);
-		final double nullOffset = entity.getHeightOffset();
 		accessor.setVehicle(seat);
-		final double scaleOffset = entity.getHeightOffset();
-		final double height = entity.getHeight() + scaleOffset;
+		final double height = entity.getHeight() + entity.getRidingOffset(seat);
 		accessor.setVehicle(prevVehicle);
 		entity.setPose(prevPose);
-
-		if(seat instanceof SeatEntity) {
-			double yoff = Main.UPDATE_HEIGHT_OFFSET - Main.UPDATE_HEIGHT_OFFSET * scaleOffset / nullOffset;
-			seat.setPos(seat.getX(), seat.getY() + yoff, seat.getZ());
-		}
 
 		return height;
 	}
