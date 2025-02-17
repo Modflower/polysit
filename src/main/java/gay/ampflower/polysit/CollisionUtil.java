@@ -10,6 +10,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.Box;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -124,7 +125,7 @@ public final class CollisionUtil {
 
 	public static boolean isClear(final Entity entity, final double seatX, final double seatY, final double seatZ,
 			double minY) {
-		final double maxY = entity.getHeight() - entity.getHeightOffset();
+		final double maxY = getEffectiveSittingHeight(entity);
 		final var box = box(seatX, minY, seatZ, entity.getWidth(), seatY + maxY);
 
 		return !entity.getWorld().getBlockCollisions(entity, box).iterator().hasNext();
@@ -133,6 +134,18 @@ public final class CollisionUtil {
 	public static Box box(double x, double y, double z, double w, double my) {
 		w /= 2;
 		return new Box(x - w, y, z - w, x + w, my, z + w);
+	}
+
+	private static float getEffectiveSittingHeight(final Entity entity) {
+		final float height = entity.getDimensions(EntityPose.SITTING).height;
+
+		final float scale = entity instanceof LivingEntity living ? living.getScaleFactor() : 1.f;
+
+		if(height <= 1.5F) {
+			return height * scale;
+		}
+
+		return (height - (float)Main.VERTICAL_SLAB_OFFSET) * scale;
 	}
 
 	public record FittingPosition(double y, EntityPose pose) {
