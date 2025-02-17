@@ -11,12 +11,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -156,6 +158,21 @@ public class SeatEntity extends Entity implements PolymerEntity {
 			return;
 		}
 		setYaw(passenger.getYaw());
+	}
+
+	@Override
+	public boolean damage(final DamageSource source, final float amount) {
+		if (isInvulnerableTo(source)) {
+			return false;
+		}
+
+		this.remove(RemovalReason.KILLED);
+		return true;
+	}
+
+	@Override
+	public boolean isInvulnerableTo(final DamageSource source) {
+		return !source.isIn(DamageTypeTags.IS_EXPLOSION) && super.isInvulnerableTo(source);
 	}
 
 	private boolean isDiscardable() {
