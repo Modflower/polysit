@@ -159,12 +159,7 @@ public class Main {
 				}
 
 				if (!entity.isOnGround()) {
-					source.sendError(Text.of("Unable to sit while falling."));
-					return 0;
-				}
-
-				if (entity.isInSwimmingPose()) {
-					source.sendError(Text.of("A lil' cramped here to sit."));
+					source.sendError(Text.of("It appears you're trying to sit on air."));
 					return 0;
 				}
 
