@@ -275,7 +275,7 @@ public class Main {
 			}
 
 			double x = pos.getX() + HORIZONTAL_CENTER_OFFSET;
-			double y = pos.getY() + VERTICAL_SLAB_OFFSET;
+			double y = pos.getY() + getTopHeight(world, state, pos, entity) + VERTICAL_SOLID_OFFSET;
 			double z = pos.getZ() + HORIZONTAL_CENTER_OFFSET;
 			return sit(world, entity, x, y, z, minY);
 		}
