@@ -183,13 +183,11 @@ public class Main {
 					return Command.SINGLE_SUCCESS;
 				}
 
-				double blockY = pos.getY() + topHeight;
-
 				double x = entity.getX();
-				double y = blockY + VERTICAL_SOLID_OFFSET;
+				double y = ground + VERTICAL_SOLID_OFFSET;
 				double z = entity.getZ();
 
-				if (sit(world, entity, x, y, z, blockY).isAccepted()) {
+				if (sit(world, entity, x, y, z, ground).isAccepted()) {
 					return Command.SINGLE_SUCCESS;
 				}
 
