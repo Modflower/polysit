@@ -7,6 +7,7 @@
 package gay.ampflower.polysit;
 
 import com.mojang.logging.LogUtils;
+import gay.ampflower.polysit.mixin.AccessorEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
@@ -129,10 +130,16 @@ public final class CollisionUtil {
 	private static double getEffectiveSittingHeight(final Entity entity, final Entity seat) {
 		// Funny catch: The entity already needs to be in sitting/standing pose for
 		// getVehicleAttachmentPos to behave correctly.
-		final var tmp = entity.getPose();
+		final var prevPose = entity.getPose();
+		final var prevVehicle = entity.getVehicle();
+		final var accessor = (AccessorEntity) entity;
 		entity.setPose(EntityPose.SITTING);
+		// Pehkui workaround - requires a vehicle to get the correct offset.
+		// As the seat in question is the vehicle, it'll always be correct.
+		accessor.setVehicle(seat);
 		final double height = entity.getHeight() + entity.getHeightOffset();
-		entity.setPose(tmp);
+		accessor.setVehicle(prevVehicle);
+		entity.setPose(prevPose);
 
 		return height;
 	}
