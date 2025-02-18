@@ -160,19 +160,25 @@ public class Main {
 					return 0;
 				}
 
-				var pos = entity.getBlockPos();
+				BlockPos pos;
 				var world = entity.getWorld();
+				var ground = CollisionUtil.ground(entity);
+
+				if (entity.getY() - ground > 1) {
+					source.sendError(Text.of("It appears you're trying to sit on air."));
+				}
+
+				// Check if floored Y == ground, and move down if yes.
+				if (ground % 1 == 0 || isAir(entity.getBlockStateAtPos(), entity.getBlockPos(), entity)) {
+					pos = blockPosOfFloored(entity.getX(), ground - 1, entity.getZ());
+				} else {
+					pos = blockPosOfFloored(entity.getX(), ground, entity.getZ());
+				}
 				var state = world.getBlockState(pos);
 				var topHeight = getTopHeight(world, state, pos, entity);
 
 				// Skip if it's not solid or taller than jump height.
 				if (topHeight < 0.D || topHeight > JumpHeightUtil.maxJumpHeight(entity)) {
-					pos = pos.down();
-					state = world.getBlockState(pos);
-					topHeight = getTopHeight(world, state, pos, entity);
-				}
-
-				if (topHeight < 0.D) {
 					source.sendError(Text.of("It appears you're trying to sit on air."));
 					return 0;
 				}
@@ -217,6 +223,10 @@ public class Main {
 		}
 
 		return state.getCollisionShape(world, pos, ShapeContext.of(entity)).getMax(Direction.Axis.Y);
+	}
+
+	private static boolean isAir(BlockState state, BlockPos pos, Entity entity) {
+		return state.isAir() || state.getCollisionShape(entity.getWorld(), pos, ShapeContext.of(entity)).isEmpty();
 	}
 
 	public static ActionResult sit(@NotNull final World world, @NotNull final BlockState state,
