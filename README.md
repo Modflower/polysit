@@ -1,5 +1,4 @@
 <img width="128" src="src/main/resources/pack.png" alt="Polysit Icon" align="right"/>
-<div align="left">
 
 # Polysit
 
@@ -46,8 +45,6 @@ It'll similarly let you sit anywhere, if the server is running Polysit.
    Java 21 is required for >=1.20.5.
 2. Run `gradlew build`
 3. Get the build from `builds/libs`.
-
-</div>
 
 [Polymer]: https://modrinth.com/mod/polymer
 
