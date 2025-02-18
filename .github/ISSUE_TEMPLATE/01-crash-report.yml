@@ -1,6 +1,7 @@
 name: Crash report
 description: Submit a crash report to help us improve.
 labels: [ 'bug', 'critical' ]
+type: bug
 
 body:
   - type: textarea
@@ -10,11 +11,11 @@ body:
         What platform & version of the mod are you using?
 
         Example:
-          - **Minecraft**: 1.18.2 Server
-          - **Polysit**: 0.0.0
-          - **Polymer**: 0.2.0-pre.2
-          - **Loader**: Quilt
-          - **Java**: Adoptium 17.0.3
+          - **Minecraft**: 1.21.4 Server
+          - **Polysit**: 0.8.4+1.21.2
+          - **Polymer**: 0.11.6+1.21.4
+          - **Loader**: Fabric 0.16.10
+          - **Java**: Temurin 21.0.6+7
       value: |
         - **Minecraft**:
         - **Polysit**:
@@ -42,12 +43,17 @@ body:
 
         Tip: You can click the text box then drag the files into here in place of the details tags.
       value: |
-        <details><summary>Latest logs</summary><code>
+        <details><summary>Latest logs</summary>
+        <!-- If your log is too long, upload it to https://mclo.gs then paste the link here. -->
+        <code>
 
         <!-- Paste the log here. Usually located at <server-root>/logs/latest.log -->
 
-        </code></details>
-        <details><summary>Crash Report</summary><code>
+        </code>
+        </details>
+        <details><summary>Crash Report</summary>
+        <!-- If your crash report is too long, upload it to https://mclo.gs then paste the link here. -->
+        <code>
 
         <!-- Paste the crash report here. Usually located at <server-root>/crash-reports/ -->
 

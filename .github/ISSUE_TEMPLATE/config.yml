@@ -1,0 +1,10 @@
+blank_issues_enabled: true
+
+contact_links:
+  - name: Discussions
+    url: https://github.com/orgs/Modflower/discussions
+    about: If you need support, please check here.
+
+  - name: Ampflower's Discord
+    url: https://discord.gg/EmPS9y9
+    about: If you need support, please check here.
