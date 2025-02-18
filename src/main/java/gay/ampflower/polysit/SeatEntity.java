@@ -165,13 +165,8 @@ public class SeatEntity extends Entity implements PolymerEntity {
 		return true;
 	}
 
-	private boolean isDiscardable() {
-		final var world = this.getWorld();
-		if (((world.getTime() + hashCode()) & 31) != 0) {
-			return false;
-		}
-
-		return world.getBlockState(getAdjustedPos()).isAir();
+	protected boolean isDiscardable() {
+		return this.getWorld().getBlockState(getAdjustedPos()).isAir();
 	}
 
 	private BlockPos getAdjustedPos() {
