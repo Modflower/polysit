@@ -18,7 +18,6 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -164,11 +163,6 @@ public class SeatEntity extends Entity implements PolymerEntity {
 
 		this.remove(RemovalReason.KILLED);
 		return true;
-	}
-
-	@Override
-	public boolean isInvulnerableTo(final DamageSource source) {
-		return !source.isIn(DamageTypeTags.IS_EXPLOSION) && super.isInvulnerableTo(source);
 	}
 
 	private boolean isDiscardable() {
