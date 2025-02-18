@@ -155,17 +155,13 @@ public class Main {
 					return Command.SINGLE_SUCCESS;
 				}
 
-				if (!entity.isOnGround()) {
-					source.sendError(Text.of("It appears you're trying to sit on air."));
-					return 0;
-				}
-
 				BlockPos pos;
 				var world = entity.getWorld();
 				var ground = CollisionUtil.ground(entity);
 
-				if (entity.getY() - ground > 1) {
+				if (entity.getY() - ground > 1 || entity.fallDistance > 0.15F) {
 					source.sendError(Text.of("It appears you're trying to sit on air."));
+					return 0;
 				}
 
 				// Check if floored Y == ground, and move down if yes.
@@ -178,7 +174,7 @@ public class Main {
 				var topHeight = getTopHeight(world, state, pos, entity);
 
 				// Skip if it's not solid or taller than jump height.
-				if (topHeight < 0.D || topHeight > JumpHeightUtil.maxJumpHeight(entity)) {
+				if (topHeight < 0.D) {
 					source.sendError(Text.of("It appears you're trying to sit on air."));
 					return 0;
 				}
