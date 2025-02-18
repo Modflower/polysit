@@ -69,7 +69,7 @@ public class Main {
 		// No need to pollute the class fields.
 		final double verticalSolidOffset = -0.20D;
 		final double verticalSlabOffset = 0.35D;
-		final double verticalFenceOffset = 0.75D;
+		final double verticalFenceOffset = 1 + verticalSolidOffset;
 		final int updateChangingOffset = 3572; // 1.20.2-pre.1; <=23w35a are no-boots
 
 		// Adjusts offset for >1.20.2-rc.1.
@@ -291,6 +291,10 @@ public class Main {
 	}
 
 	public static ActionResult sit(World world, Entity entity, double seatX, double seatY, double seatZ, double minY) {
+		if (world.getBlockState(blockPosOfFloored(seatX, seatY, seatZ)).isAir()) {
+			return ActionResult.PASS;
+		}
+
 		var seat = new SeatEntity(world, seatX, seatY, seatZ);
 
 		if (!CollisionUtil.isClear(entity, seat, minY)) {
