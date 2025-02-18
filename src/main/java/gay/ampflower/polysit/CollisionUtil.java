@@ -144,7 +144,7 @@ public final class CollisionUtil {
 		accessor.setVehicle(prevVehicle);
 		entity.setPose(prevPose);
 
-		if(seat instanceof SeatEntity) {
+		if (seat instanceof SeatEntity) {
 			double yoff = Main.UPDATE_HEIGHT_OFFSET - Main.UPDATE_HEIGHT_OFFSET * scaleOffset / nullOffset;
 			seat.setPos(seat.getX(), seat.getY() + yoff, seat.getZ());
 		}
