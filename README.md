@@ -37,6 +37,31 @@ It'll similarly let you sit anywhere, if the server is running Polysit.
 >
 > Unfortunately, this is unavoidable as the only method Polysit uses on the client is the `/sit` command.
 
+## Compatibility
+
+It is compatible with any mod that implements standard slabs, stairs and beds.
+It's even compatible with the scale attribute, and other scaling mods such as Pehkui.
+
+> [!NOTE]
+> 1.20.1 and older has poorer support for Pehkui.
+> Bugs in relation to scaling while sitting will occur.
+> There are still [mitigations](#changes-to-vanilla-logic) for Polysit's other behaviours.  
+
+If for any reason, there's a slab, stair, bed, or any other seat-like block that doesn't work,
+[feel free to submit a bug report](https://github.com/Modflower/Polysit/issues/).
+
+### Changes to Vanilla Logic
+
+Polysit does try to fix bugs that were found in development, or directly caused by its functionality.
+
+- Moving the player out of blocks when getting up.
+- Forcing the player to take a smaller pose to avoid suffocating when getting off a seat.
+  - This applies generically to any seat, not just Polysit's.
+- Forcefully sending relevant packets for bugs caused by Mojang's fixes or changes.
+- Beds during the day can be right-clicked to sit on it.
+
+All help to ensure that Polysit provides the best UX it possibly can while also maintaining vanilla-esk logic.
+
 ## Building
 
 1. Make sure you have the JDK.
