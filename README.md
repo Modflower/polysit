@@ -50,7 +50,7 @@ It's even compatible with the scale attribute, and other scaling mods such as Pe
 If for any reason, there's a slab, stair, bed, or any other seat-like block that doesn't work,
 [feel free to submit a bug report](https://github.com/Modflower/Polysit/issues/).
 
-### Changes to Vanilla Logic
+## Changes to Vanilla Logic
 
 Polysit does try to fix bugs that were found in development, or directly caused by its functionality.
 
