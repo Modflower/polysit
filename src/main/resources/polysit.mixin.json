@@ -5,6 +5,7 @@
   "mixins": [
     "AccessorEntity",
     "AccessorLivingEntity",
+    "MixinEntity",
     "MixinEntityTypeBootstrap",
     "MixinLivingEntity",
     "MixinServerPlayerEntity"
