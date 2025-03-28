@@ -104,7 +104,7 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	@Override
 	protected void readCustomDataFromNbt(NbtCompound nbt) {
 		// Avoids setting position on entity init
-		final var version = nbt.getInt(Main.VERSION_TAG_NAME);
+		final var version = nbt.getInt(Main.VERSION_TAG_NAME, 0);
 		if (version != Main.RUNTIME_VERSION) {
 			this.setPos(this.getX(), this.getY() + Main.delta(version), this.getZ());
 			// Required to suppress the packet
@@ -125,20 +125,6 @@ public class SeatEntity extends Entity implements PolymerEntity {
 			return false;
 		}
 		return hasPassengers();
-	}
-
-	/** Discard self when passengers are dismounted. */
-	@Override
-	public void removeAllPassengers() {
-		super.removeAllPassengers();
-		discard();
-	}
-
-	/** Discard self when the passenger is dismounted. */
-	@Override
-	protected void removePassenger(Entity passenger) {
-		super.removePassenger(passenger);
-		discard();
 	}
 
 	/**

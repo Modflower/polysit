@@ -273,7 +273,8 @@ public class Main {
 
 				// Set the spawn point for the player as one would expect.
 				if (head != null) {
-					player.setSpawnPoint(world.getRegistryKey(), head, player.getYaw(), false, true);
+					player.setSpawnPoint(
+							new ServerPlayerEntity.Respawn(world.getRegistryKey(), head, player.getYaw(), false), true);
 				}
 			}
 

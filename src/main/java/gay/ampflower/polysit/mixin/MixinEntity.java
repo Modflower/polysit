@@ -1,0 +1,31 @@
+/* Copyright 2025 Ampflower
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+package gay.ampflower.polysit.mixin;
+
+import gay.ampflower.polysit.internal.HackEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.math.Vec3d;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+/**
+ * @author Ampflower
+ * @since 0.8.5
+ **/
+@Mixin(Entity.class)
+class MixinEntity implements HackEntity {
+	@Shadow
+	public native Vec3d getVelocity();
+
+	@Inject(method = "requestTeleportAndDismount", at = @At("RETURN"))
+	private void onDismount(double x, double y, double z, CallbackInfo ci) {
+		this.polysit$requestTeleportOnDismount(new Vec3d(x, y, z), this.getVelocity());
+	}
+}
