@@ -10,6 +10,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.logging.LogUtils;
 import eu.pb4.polymer.core.api.entity.PolymerEntityUtils;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.SharedConstants;
 import net.minecraft.block.BedBlock;
@@ -223,6 +224,21 @@ public class Main {
 		return state.isAir() || state.getCollisionShape(entity.getWorld(), pos, ShapeContext.of(entity)).isEmpty();
 	}
 
+	private static boolean maySleep(final Entity entity, final BlockPos pos) {
+		if (entity instanceof ServerPlayerEntity player) {
+			final var result = EntitySleepEvents.ALLOW_SLEEP_TIME.invoker().allowSleepTime(player, pos, false);
+			if (result.isAccepted()) {
+				return true;
+			}
+			if (result == ActionResult.PASS) {
+				return !player.getWorld().isDay();
+			}
+			return false;
+		}
+
+		return !entity.getWorld().isDay();
+	}
+
 	public static ActionResult sit(@NotNull final World world, @NotNull final BlockState state,
 			@NotNull final BlockPos pos, @NotNull final Entity entity, final double topHeight, final boolean command) {
 		final double minY = pos.getY() + topHeight;
@@ -249,7 +265,7 @@ public class Main {
 			return sit(world, entity, x, y, z, minY);
 		}
 
-		if (state.getBlock() instanceof BedBlock && world.isDay()) {
+		if (state.getBlock() instanceof BedBlock && !maySleep(entity, pos)) {
 			if (!command && entity instanceof ServerPlayerEntity player) {
 				// Let the bed explode as it should normally.
 				if (!BedBlock.isBedWorking(world)) {
@@ -269,7 +285,7 @@ public class Main {
 				}
 
 				// Set the spawn point for the player as one would expect.
-				if (head != null) {
+				if (head != null && EntitySleepEvents.ALLOW_SETTING_SPAWN.invoker().allowSettingSpawn(player, head)) {
 					player.setSpawnPoint(world.getRegistryKey(), head, player.getYaw(), false, true);
 				}
 			}
