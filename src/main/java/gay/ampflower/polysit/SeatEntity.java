@@ -14,17 +14,12 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-
-import static net.minecraft.entity.decoration.ArmorStandEntity.ARMOR_STAND_FLAGS;
 
 /**
  * The ephemeral seat entity used to allow the player to have a sit pose
@@ -73,25 +68,7 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	 */
 	@Override
 	public EntityType<?> getPolymerEntityType(ServerPlayerEntity player) {
-		return EntityType.ARMOR_STAND;
-	}
-
-	/**
-	 * Tells the client that we're a marker armor stand, and that we have no health.
-	 */
-	@Override
-	public void modifyRawTrackedData(List<DataTracker.SerializedEntry<?>> data, ServerPlayerEntity player,
-			boolean initial) {
-		data.add(new DataTracker.Entry<>(ARMOR_STAND_FLAGS, (byte) 16).toSerialized());
-		// This must be manually sent as there's no other mechanism we can use to send
-		// this.
-		if (player != null) {
-			// Really, this shouldn't be null but apparently Polymer 0.3.13+1.19.3 is
-			// slightly busted in that joining a world while sitting on a seat causes an
-			// instant crash.
-			// We can at least mitigate it here.
-			player.networkHandler.sendPacket(new EntityAttributesS2CPacket(getId(), MAX_HEALTH_NULL_SINGLE));
-		}
+		return EntityType.BLOCK_DISPLAY;
 	}
 
 	@Override
