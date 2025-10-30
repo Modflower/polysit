@@ -32,7 +32,7 @@ public class Client implements ClientModInitializer {
 				final var play = client.getNetworkHandler();
 
 				if (play != null && play.getCommandDispatcher().findNode(List.of("sit")) != null) {
-					play.sendCommand("sit");
+					play.sendChatCommand("sit");
 				}
 			}
 		});
