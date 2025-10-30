@@ -13,11 +13,12 @@ import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -102,7 +103,7 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	}
 
 	@Override
-	protected void readCustomDataFromNbt(NbtCompound nbt) {
+	protected void readCustomData(final ReadView nbt) {
 		// Avoids setting position on entity init
 		final var version = nbt.getInt(Main.VERSION_TAG_NAME, 0);
 		if (version != Main.RUNTIME_VERSION) {
@@ -113,7 +114,7 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	}
 
 	@Override
-	protected void writeCustomDataToNbt(NbtCompound nbt) {
+	protected void writeCustomData(final WriteView nbt) {
 		nbt.putInt(Main.VERSION_TAG_NAME, Main.RUNTIME_VERSION);
 	}
 

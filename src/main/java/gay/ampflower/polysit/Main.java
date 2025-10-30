@@ -68,7 +68,7 @@ public class Main {
 	private static final double[] OFFSET_DELTA = { 0, UPDATE_HEIGHT_OFFSET };
 
 	static {
-		final var currentVersion = SharedConstants.getGameVersion().getSaveVersion().getId();
+		final var currentVersion = SharedConstants.WORLD_VERSION;
 
 		// No need to pollute the class fields.
 		final double verticalSolidOffset = -0.20D;
