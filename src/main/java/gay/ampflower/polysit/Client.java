@@ -20,12 +20,14 @@ import java.util.List;
  * @since 0.7.1
  **/
 public class Client implements ClientModInitializer {
+	private static final KeyBinding.Category polysitKeybind = KeyBinding.Category.create(Main.id("gameplay"));
+
 	private static KeyBinding sitBinding;
 
 	@Override
 	public void onInitializeClient() {
 		sitBinding = KeyBindingHelper.registerKeyBinding(
-				new KeyBinding("key.polysit.sit", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_G, "category.polysit.gameplay"));
+				new KeyBinding("key.polysit.sit", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_G, polysitKeybind));
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (sitBinding.wasPressed()) {
