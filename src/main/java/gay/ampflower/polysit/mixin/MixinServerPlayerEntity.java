@@ -6,7 +6,7 @@
 
 package gay.ampflower.polysit.mixin;
 
-import net.minecraft.entity.player.PlayerPosition;
+import net.minecraft.entity.EntityPosition;
 import net.minecraft.network.packet.s2c.play.PositionFlag;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -38,7 +38,9 @@ public abstract class MixinServerPlayerEntity extends MixinEntity {
 	 */
 	@Override
 	protected void onDismount(final double x, final double y, final double z, final CallbackInfo ci) {
-		this.networkHandler.requestTeleport(new PlayerPosition(new Vec3d(x, y, z), this.getVelocity(), 0.F, 0.F),
-				PositionFlag.ROT);
+		this.networkHandler.requestTeleport(
+			new EntityPosition(new Vec3d(x, y, z), this.getVelocity(), 0.F, 0.F),
+			PositionFlag.ROT
+		);
 	}
 }

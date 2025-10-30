@@ -149,11 +149,11 @@ public final class CollisionUtil {
 	}
 
 	private static Stream<VoxelShape> collisionStream(Entity entity, Box box) {
-		return StreamSupport.stream(entity.getWorld().getBlockCollisions(entity, box).spliterator(), false);
+		return StreamSupport.stream(entity.getEntityWorld().getBlockCollisions(entity, box).spliterator(), false);
 	}
 
 	private static Iterable<VoxelShape> collisions(Entity entity, Box box) {
-		return entity.getWorld().getBlockCollisions(entity, box);
+		return entity.getEntityWorld().getBlockCollisions(entity, box);
 	}
 
 	public record FittingPosition(double y, EntityPose pose) {

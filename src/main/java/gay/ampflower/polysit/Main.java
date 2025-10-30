@@ -42,6 +42,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProperties;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -127,9 +128,10 @@ public class Main {
 	 */
 	public static void main() {
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
-			if (!world.isClient && hand == Hand.MAIN_HAND
-					&& (player.isOnGround() || player.hasVehicle() || player.isCreative())
-					&& player.getStackInHand(hand).isEmpty() && hitResult.getSide() != Direction.DOWN) {
+			if (!world.isClient() && hand == Hand.MAIN_HAND
+				&& (player.isOnGround() || player.hasVehicle() || player.isCreative())
+				&& player.getStackInHand(hand).isEmpty() && hitResult.getSide() != Direction.DOWN
+			) {
 				var pos = hitResult.getBlockPos();
 
 				if (hitResult.squaredDistanceTo(player) > 5 * 5) {
@@ -160,7 +162,7 @@ public class Main {
 				}
 
 				BlockPos pos;
-				var world = entity.getWorld();
+				var world = entity.getEntityWorld();
 				var ground = CollisionUtil.ground(entity);
 
 				if (entity.getY() - ground > 1 || entity.fallDistance > 0.15F) {
@@ -208,7 +210,7 @@ public class Main {
 		}
 
 		final var pos = entity.getBlockPos();
-		final var world = entity.getWorld();
+		final var world = entity.getEntityWorld();
 		final var block = world.getBlockState(pos);
 		final var height = getTopHeight(world, block, pos, entity);
 
@@ -224,7 +226,8 @@ public class Main {
 	}
 
 	private static boolean isAir(BlockState state, BlockPos pos, Entity entity) {
-		return state.isAir() || state.getCollisionShape(entity.getWorld(), pos, ShapeContext.of(entity)).isEmpty();
+		return state.isAir() || state.getCollisionShape(entity.getEntityWorld(), pos, ShapeContext.of(entity))
+			.isEmpty();
 	}
 
 	private static boolean maySleep(final Entity entity, final BlockPos pos) {
@@ -234,12 +237,12 @@ public class Main {
 				return true;
 			}
 			if (result == ActionResult.PASS) {
-				return !player.getWorld().isDay();
+				return !player.getEntityWorld().isDay();
 			}
 			return false;
 		}
 
-		return !entity.getWorld().isDay();
+		return !entity.getEntityWorld().isDay();
 	}
 
 	public static ActionResult sit(@NotNull final World world, @NotNull final BlockState state,
@@ -289,8 +292,14 @@ public class Main {
 
 				// Set the spawn point for the player as one would expect.
 				if (head != null && EntitySleepEvents.ALLOW_SETTING_SPAWN.invoker().allowSettingSpawn(player, head)) {
-					player.setSpawnPoint(
-							new ServerPlayerEntity.Respawn(world.getRegistryKey(), head, player.getYaw(), false), true);
+					final var spawnPoint = WorldProperties.SpawnPoint.create(
+						world.getRegistryKey(),
+						head,
+						player.getYaw(),
+						player.getPitch()
+					);
+
+					player.setSpawnPoint(new ServerPlayerEntity.Respawn(spawnPoint, false), true);
 				}
 			}
 
@@ -342,5 +351,9 @@ public class Main {
 
 	public static BlockPos blockPosOfFloored(Vec3d vec3d) {
 		return blockPosOfFloored(vec3d.x, vec3d.y, vec3d.z);
+	}
+
+	static Identifier id(String value) {
+		return Identifier.of("polysit", value);
 	}
 }

@@ -160,10 +160,10 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	}
 
 	protected boolean isDiscardable() {
-		return this.getWorld().getBlockState(getAdjustedPos()).isAir();
+		return this.getEntityWorld().getBlockState(getAdjustedPos()).isAir();
 	}
 
 	private BlockPos getAdjustedPos() {
-		return Main.blockPosOfFloored(getPos().add(0, Main.VERTICAL_CHECK_OFFSET, 0));
+		return Main.blockPosOfFloored(getEntityPos().add(0, Main.VERTICAL_CHECK_OFFSET, 0));
 	}
 }
