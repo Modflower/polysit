@@ -38,7 +38,6 @@ public abstract class MixinServerPlayerEntity extends MixinEntity {
 	 */
 	@Override
 	protected void onDismount(final double x, final double y, final double z, final CallbackInfo ci) {
-		System.out.printf("%f, %f, %f, %s\n", x, y, z, ci);
 		this.networkHandler.requestTeleport(new PlayerPosition(new Vec3d(x, y, z), this.getVelocity(), 0.F, 0.F),
 				PositionFlag.ROT);
 	}
