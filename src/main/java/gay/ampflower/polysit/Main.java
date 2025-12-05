@@ -43,6 +43,7 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProperties;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -232,14 +233,10 @@ public class Main {
 
 	private static boolean maySleep(final Entity entity, final BlockPos pos) {
 		if (entity instanceof ServerPlayerEntity player) {
-			final var result = EntitySleepEvents.ALLOW_SLEEP_TIME.invoker().allowSleepTime(player, pos, false);
-			if (result.isAccepted()) {
-				return true;
+			final var result = EntitySleepEvents.ALLOW_SLEEPING.invoker().allowSleep(player, pos);
+			if (result != null) {
+				return false;
 			}
-			if (result == ActionResult.PASS) {
-				return !player.getEntityWorld().isDay();
-			}
-			return false;
 		}
 
 		return !entity.getEntityWorld().isDay();
@@ -274,7 +271,9 @@ public class Main {
 		if (state.getBlock() instanceof BedBlock && !maySleep(entity, pos)) {
 			if (!command && entity instanceof ServerPlayerEntity player) {
 				// Let the bed explode as it should normally.
-				if (!BedBlock.isBedWorking(world)) {
+				final var rule = world.getEnvironmentAttributes()
+					.getAttributeValue(EnvironmentAttributes.BED_RULE_GAMEPLAY, pos);
+				if (rule.explodes()) {
 					return ActionResult.PASS;
 				}
 
