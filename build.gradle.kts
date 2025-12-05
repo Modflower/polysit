@@ -5,7 +5,6 @@ plugins {
 	java
 	`java-library`
 	id("fabric-loom")
-	id("com.diffplug.spotless")
 	id("com.modrinth.minotaur")
 	`maven-publish`
 }
@@ -52,14 +51,7 @@ dependencies {
 	modImplementation("net.fabricmc.fabric-api", "fabric-api", fabricApiVersion)
 	modImplementation("eu.pb4", "polymer-core", polymerVersion)
 }
-spotless {
-	java {
-		importOrderFile(projectDir.resolve(".internal/spotless.importorder"))
-		eclipse().configFile(projectDir.resolve(".internal/spotless.xml"))
 
-		licenseHeaderFile(projectDir.resolve(".internal/license-header.java"))
-	}
-}
 tasks {
 	withType<JavaCompile> {
 		options.encoding = "UTF-8"

@@ -17,8 +17,6 @@ pluginManagement {
 	}
 	plugins {
 		id("fabric-loom") version System.getProperty("loomVersion")!!
-		id("com.diffplug.spotless") version System.getProperty("spotlessVersion")!!
 		id("com.modrinth.minotaur") version System.getProperty("minotaurVersion")!!
-		id("io.github.juuxel.loom-quiltflower") version System.getProperty("quiltflowerVersion")!!
 	}
 }
