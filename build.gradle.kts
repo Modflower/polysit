@@ -4,7 +4,7 @@ import com.modrinth.minotaur.dependencies.ModDependency
 plugins {
 	java
 	`java-library`
-	id("fabric-loom")
+	id("net.fabricmc.fabric-loom-remap")
 	id("com.modrinth.minotaur")
 	`maven-publish`
 }
@@ -46,7 +46,7 @@ repositories {
 
 dependencies {
 	minecraft("com.mojang", "minecraft", minecraftVersion)
-	mappings("net.fabricmc", "yarn", yarnMappings, classifier = "v2")
+	mappings(loom.officialMojangMappings())
 	modImplementation("net.fabricmc", "fabric-loader", loaderVersion)
 	modImplementation("net.fabricmc.fabric-api", "fabric-api", fabricApiVersion)
 	modImplementation("eu.pb4", "polymer-core", polymerVersion)
@@ -83,8 +83,8 @@ tasks {
 			else -> "release"
 		})
 		val ref = System.getenv("GITHUB_REF")
-		changelog.set(System.getenv("CHANGELOG") ?: if (ref != null && ref.startsWith("refs/tags/")) "You may view the changelog at https://github.com/the-glitch-network/polysit/releases/tag/${com.google.common.net.UrlEscapers.urlFragmentEscaper().escape(ref.substring(10))}"
-		else "No changelog is available. Perhaps poke at https://github.com/the-glitch-network/polysit for a changelog?")
+//		changelog.set(System.getenv("CHANGELOG") ?: if (ref != null && ref.startsWith("refs/tags/")) "You may view the changelog at https://github.com/the-glitch-network/polysit/releases/tag/${com.google.common.net.UrlEscapers.urlFragmentEscaper().escape(ref.substring(10))}"
+//		else "No changelog is available. Perhaps poke at https://github.com/the-glitch-network/polysit for a changelog?")
 		uploadFile.set(remapJar.get())
 		gameVersions.set(minecraftCompatible.split(","))
 		loaders.addAll("fabric", "quilt")

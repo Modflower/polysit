@@ -7,7 +7,7 @@
 package gay.ampflower.polysit.mixin;// Created 2022-08-05T23:06:01
 
 import gay.ampflower.polysit.Main;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;
 
 /**

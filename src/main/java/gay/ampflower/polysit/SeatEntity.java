@@ -7,20 +7,20 @@
 package gay.ampflower.polysit;// Created 2022-08-05T21:27:35
 
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
-import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import org.jetbrains.annotations.Nullable;
 import xyz.nucleoid.packettweaker.PacketContext;
 
@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static net.minecraft.entity.decoration.ArmorStandEntity.ARMOR_STAND_FLAGS;
+import static net.minecraft.world.entity.decoration.ArmorStand.DATA_CLIENT_FLAGS;
 
 /**
  * The ephemeral seat entity used to allow the player to have a sit pose
@@ -48,10 +48,10 @@ import static net.minecraft.entity.decoration.ArmorStandEntity.ARMOR_STAND_FLAGS
  * @since 0.0.0
  **/
 public class SeatEntity extends Entity implements PolymerEntity {
-	private static final EntityAttributeInstance MAX_HEALTH_NULL = new EntityAttributeInstance(
-			EntityAttributes.MAX_HEALTH, discard -> {
+	private static final AttributeInstance MAX_HEALTH_NULL = new AttributeInstance(
+		Attributes.MAX_HEALTH, discard -> {
 			});
-	private static final Collection<EntityAttributeInstance> MAX_HEALTH_NULL_SINGLE = Collections
+	private static final Collection<AttributeInstance> MAX_HEALTH_NULL_SINGLE = Collections
 			.singleton(MAX_HEALTH_NULL);
 
 	static {
@@ -59,16 +59,16 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	}
 
 	/** Initialises the seat to be invisible and to have no gravity. */
-	public SeatEntity(EntityType<? extends SeatEntity> type, World world) {
+	public SeatEntity(EntityType<? extends SeatEntity> type, Level world) {
 		super(type, world);
 		this.setInvisible(true);
 		this.setNoGravity(true);
 	}
 
-	public SeatEntity(World world, double x, double y, double z) {
+	public SeatEntity(Level world, double x, double y, double z) {
 		this(Main.SEAT, world);
-		this.setPosition(x, y, z);
-		this.resetPosition();
+		this.setPos(x, y, z);
+		this.setOldPosAndRot();
 	}
 
 	/**
@@ -84,9 +84,10 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	 * Tells the client that we're a marker armor stand, and that we have no health.
 	 */
 	@Override
-	public void modifyRawTrackedData(List<DataTracker.SerializedEntry<?>> data, ServerPlayerEntity player,
+	public void modifyRawTrackedData(
+		List<SynchedEntityData.DataValue<?>> data, ServerPlayer player,
 			boolean initial) {
-		data.add(new DataTracker.Entry<>(ARMOR_STAND_FLAGS, (byte) 16).toSerialized());
+		data.add(new SynchedEntityData.DataItem<>(DATA_CLIENT_FLAGS, (byte) 16).value());
 		// This must be manually sent as there's no other mechanism we can use to send
 		// this.
 		if (player != null) {
@@ -94,38 +95,38 @@ public class SeatEntity extends Entity implements PolymerEntity {
 			// slightly busted in that joining a world while sitting on a seat causes an
 			// instant crash.
 			// We can at least mitigate it here.
-			player.networkHandler.sendPacket(new EntityAttributesS2CPacket(getId(), MAX_HEALTH_NULL_SINGLE));
+			player.connection.send(new ClientboundUpdateAttributesPacket(getId(), MAX_HEALTH_NULL_SINGLE));
 		}
 	}
 
 	@Override
-	protected void initDataTracker(final DataTracker.Builder builder) {
+	protected void defineSynchedData(final SynchedEntityData.Builder builder) {
 	}
 
 	@Override
-	protected void readCustomData(final ReadView nbt) {
+	protected void readAdditionalSaveData(final ValueInput nbt) {
 		// Avoids setting position on entity init
-		final var version = nbt.getInt(Main.VERSION_TAG_NAME, 0);
+		final var version = nbt.getIntOr(Main.VERSION_TAG_NAME, 0);
 		if (version != Main.RUNTIME_VERSION) {
-			this.setPos(this.getX(), this.getY() + Main.delta(version), this.getZ());
+			this.setPosRaw(this.getX(), this.getY() + Main.delta(version), this.getZ());
 			// Required to suppress the packet
-			this.resetPosition();
+			this.setOldPosAndRot();
 		}
 	}
 
 	@Override
-	protected void writeCustomData(final WriteView nbt) {
+	protected void addAdditionalSaveData(final ValueOutput nbt) {
 		nbt.putInt(Main.VERSION_TAG_NAME, Main.RUNTIME_VERSION);
 	}
 
 	/** Only save if being ridden. */
 	@Override
-	public boolean shouldSave() {
+	public boolean shouldBeSaved() {
 		var reason = getRemovalReason();
 		if (reason != null && !reason.shouldSave()) {
 			return false;
 		}
-		return hasPassengers();
+		return isVehicle();
 	}
 
 	/**
@@ -140,12 +141,12 @@ public class SeatEntity extends Entity implements PolymerEntity {
 			discard();
 			return;
 		}
-		setYaw(passenger.getYaw());
+		setYRot(passenger.getYRot());
 	}
 
 	@Override
-	public boolean damage(final ServerWorld world, final DamageSource source, final float amount) {
-		if (!source.isSourceCreativePlayer() && !source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+	public boolean hurtServer(final ServerLevel world, final DamageSource source, final float amount) {
+		if (!source.isCreativePlayer() && !source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			return false;
 		}
 
@@ -154,16 +155,16 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	}
 
 	@Override
-	public void onExplodedBy(@Nullable final Entity entity) {
+	public void onExplosionHit(@Nullable final Entity entity) {
 		// Allows the seat to be destroyed by TNT.
 		this.remove(RemovalReason.KILLED);
 	}
 
 	protected boolean isDiscardable() {
-		return this.getEntityWorld().getBlockState(getAdjustedPos()).isAir();
+		return this.level().getBlockState(getAdjustedPos()).isAir();
 	}
 
 	private BlockPos getAdjustedPos() {
-		return Main.blockPosOfFloored(getEntityPos().add(0, Main.VERTICAL_CHECK_OFFSET, 0));
+		return Main.blockPosOfFloored(position().add(0, Main.VERTICAL_CHECK_OFFSET, 0));
 	}
 }

@@ -8,11 +8,11 @@ package gay.ampflower.polysit;
 
 import com.mojang.logging.LogUtils;
 import gay.ampflower.polysit.mixin.AccessorEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -33,39 +33,39 @@ public final class CollisionUtil {
 	public static FittingPosition adjustFit(final Entity entity, double x, double y, double z) {
 		// The entity in question shouldn't be able to be placed beyond their jump
 		// height.
-		double max = y + JumpHeightUtil.maxJumpHeight(entity) + entity.getHeight();
+		double max = y + JumpHeightUtil.maxJumpHeight(entity) + entity.getBbHeight();
 		double min = y;
 
-		Box box = getSmallestPose(entity, x, y, z);
-		Iterator<Box> itr = collisionBoxStream(entity, box.withMaxY(max)).iterator();
+		AABB box = getSmallestPose(entity, x, y, z);
+		Iterator<AABB> itr = collisionBoxStream(entity, box.setMaxY(max)).iterator();
 
 		while (itr.hasNext()) {
-			final Box bound = itr.next();
+			final AABB bound = itr.next();
 			if (!bound.intersects(box)) {
 				max = Math.min(max, bound.minY);
 				continue;
 			}
-			box = box.offset(0, bound.maxY - min, 0);
+			box = box.move(0, bound.maxY - min, 0);
 			min = bound.maxY;
 		}
 
 		return new FittingPosition(min, getLargestFittingPose(entity, max - min));
 	}
 
-	public static Box getSmallestPose(Entity entity, double x, double y, double z) {
-		return getSmallestPose(entity).getBoxAt(x, y, z);
+	public static AABB getSmallestPose(Entity entity, double x, double y, double z) {
+		return getSmallestPose(entity).makeBoundingBox(x, y, z);
 	}
 
 	public static EntityDimensions getSmallestPose(Entity entity) {
 		final var standing = entity.getDimensions(entity.getPose());
-		final var sneaking = entity.getDimensions(EntityPose.CROUCHING);
-		final var swimming = entity.getDimensions(EntityPose.SWIMMING);
+		final var sneaking = entity.getDimensions(Pose.CROUCHING);
+		final var swimming = entity.getDimensions(Pose.SWIMMING);
 
 		return smallest(standing, sneaking, swimming);
 	}
 
-	public static EntityPose getLargestFittingPose(Entity entity, double y) {
-		return largest(entity, y, entity.getPose(), EntityPose.STANDING, EntityPose.CROUCHING, EntityPose.SWIMMING);
+	public static Pose getLargestFittingPose(Entity entity, double y) {
+		return largest(entity, y, entity.getPose(), Pose.STANDING, Pose.CROUCHING, Pose.SWIMMING);
 	}
 
 	@NotNull
@@ -87,13 +87,13 @@ public final class CollisionUtil {
 	}
 
 	@Nullable
-	private static EntityPose largest(final Entity entity, final double maxHeight, EntityPose... poses) {
+	private static Pose largest(final Entity entity, final double maxHeight, Pose... poses) {
 		if (poses.length == 0) {
 			throw new IllegalArgumentException("poses.length == 0");
 		}
 
 		double height = 0;
-		EntityPose fittingPose = null;
+		Pose fittingPose = null;
 
 		for (final var pose : poses) {
 			final var poseHeight = entity.getDimensions(pose).height();
@@ -110,21 +110,21 @@ public final class CollisionUtil {
 		final double maxY = entity.getY();
 		final double minY = maxY - JumpHeightUtil.maxJumpHeight(entity);
 
-		final var box = box(entity.getX(), minY, entity.getZ(), entity.getWidth(), maxY);
+		final var box = box(entity.getX(), minY, entity.getZ(), entity.getBbWidth(), maxY);
 
 		return collisionBoxStream(entity, box).mapToDouble(b -> b.maxY).max().orElse(Double.NEGATIVE_INFINITY);
 	}
 
 	public static boolean isClear(final Entity entity, final Entity seat, final double minY) {
 		final double maxY = getEffectiveSittingHeight(entity, seat);
-		final var box = box(seat.getX(), minY, seat.getZ(), entity.getWidth(), seat.getY() + maxY);
+		final var box = box(seat.getX(), minY, seat.getZ(), entity.getBbWidth(), seat.getY() + maxY);
 
 		return !collisions(entity, box).iterator().hasNext();
 	}
 
-	public static Box box(double x, double y, double z, double w, double my) {
+	public static AABB box(double x, double y, double z, double w, double my) {
 		w /= 2;
-		return new Box(x - w, y, z - w, x + w, my, z + w);
+		return new AABB(x - w, y, z - w, x + w, my, z + w);
 	}
 
 	private static double getEffectiveSittingHeight(final Entity entity, final Entity seat) {
@@ -133,29 +133,29 @@ public final class CollisionUtil {
 		final var prevPose = entity.getPose();
 		final var prevVehicle = entity.getVehicle();
 		final var accessor = (AccessorEntity) entity;
-		entity.setPose(EntityPose.SITTING);
+		entity.setPose(Pose.SITTING);
 		// Pehkui workaround - requires a vehicle to get the correct offset.
 		// As the seat in question is the vehicle, it'll always be correct.
 		accessor.setVehicle(seat);
-		final double height = entity.getHeight() - entity.getVehicleAttachmentPos(seat).getY();
+		final double height = entity.getBbHeight() - entity.getVehicleAttachmentPoint(seat).y();
 		accessor.setVehicle(prevVehicle);
 		entity.setPose(prevPose);
 
 		return height;
 	}
 
-	private static Stream<Box> collisionBoxStream(Entity entity, Box box) {
-		return collisionStream(entity, box).flatMap(voxel -> voxel.getBoundingBoxes().stream()).filter(box::intersects);
+	private static Stream<AABB> collisionBoxStream(Entity entity, AABB box) {
+		return collisionStream(entity, box).flatMap(voxel -> voxel.toAabbs().stream()).filter(box::intersects);
 	}
 
-	private static Stream<VoxelShape> collisionStream(Entity entity, Box box) {
-		return StreamSupport.stream(entity.getEntityWorld().getBlockCollisions(entity, box).spliterator(), false);
+	private static Stream<VoxelShape> collisionStream(Entity entity, AABB box) {
+		return StreamSupport.stream(entity.level().getBlockCollisions(entity, box).spliterator(), false);
 	}
 
-	private static Iterable<VoxelShape> collisions(Entity entity, Box box) {
-		return entity.getEntityWorld().getBlockCollisions(entity, box);
+	private static Iterable<VoxelShape> collisions(Entity entity, AABB box) {
+		return entity.level().getBlockCollisions(entity, box);
 	}
 
-	public record FittingPosition(double y, EntityPose pose) {
+	public record FittingPosition(double y, Pose pose) {
 	}
 }

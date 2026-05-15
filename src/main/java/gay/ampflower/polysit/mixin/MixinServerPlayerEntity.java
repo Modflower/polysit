@@ -6,12 +6,11 @@
 
 package gay.ampflower.polysit.mixin;
 
-import net.minecraft.entity.EntityPosition;
-import net.minecraft.network.packet.s2c.play.PositionFlag;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.Vec3d;
-import org.spongepowered.asm.mixin.Debug;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.Relative;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -24,11 +23,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @author Ampflower
  * @since 0.3.1
  **/
-@Mixin(ServerPlayerEntity.class)
-@Debug(export = true)
+@Mixin(ServerPlayer.class)
 public abstract class MixinServerPlayerEntity extends MixinEntity {
 	@Shadow
-	public ServerPlayNetworkHandler networkHandler;
+	public ServerGamePacketListenerImpl connection;
 
 	/**
 	 * Modified requestTeleport for also sending the current velocity. Enforces that
@@ -38,9 +36,9 @@ public abstract class MixinServerPlayerEntity extends MixinEntity {
 	 */
 	@Override
 	protected void onDismount(final double x, final double y, final double z, final CallbackInfo ci) {
-		this.networkHandler.requestTeleport(
-			new EntityPosition(new Vec3d(x, y, z), this.getVelocity(), 0.F, 0.F),
-			PositionFlag.ROT
+		this.connection.teleport(
+			new PositionMoveRotation(new Vec3(x, y, z), this.getDeltaMovement(), 0.F, 0.F),
+			Relative.ROTATION
 		);
 	}
 }

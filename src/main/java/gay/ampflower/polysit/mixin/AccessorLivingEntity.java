@@ -6,7 +6,7 @@
 
 package gay.ampflower.polysit.mixin;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
@@ -17,5 +17,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(LivingEntity.class)
 public interface AccessorLivingEntity {
 	@Invoker
-	float invokeGetJumpVelocity();
+	float invokeGetJumpPower();
 }

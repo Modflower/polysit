@@ -7,10 +7,10 @@
 package gay.ampflower.polysit.mixin;// Created 2022-08-05T23:31:06
 
 import gay.ampflower.polysit.CollisionUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -24,11 +24,15 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
  **/
 @Mixin(LivingEntity.class)
 public abstract class MixinLivingEntity extends Entity {
-	public MixinLivingEntity(EntityType<?> type, World world) {
+	public MixinLivingEntity(EntityType<?> type, Level world) {
 		super(type, world);
 	}
 
-	@ModifyArg(method = "onDismounted", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;<init>(DDD)V"), index = 1)
+	@ModifyArg(
+		method = "dismountVehicle",
+		at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;<init>(DDD)V"),
+		index = 1
+	)
 	private double modifyY(double x, double y, double z) {
 		final var fit = CollisionUtil.adjustFit(this, x, y, z);
 		if (fit.pose() != null) {

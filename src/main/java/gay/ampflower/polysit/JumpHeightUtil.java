@@ -7,8 +7,8 @@
 package gay.ampflower.polysit;
 
 import gay.ampflower.polysit.mixin.AccessorLivingEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
 /**
  * Unnecessarily accurate and fast jump height utilities.
@@ -51,7 +51,7 @@ public final class JumpHeightUtil {
 	}
 
 	public static double maxJumpHeight(LivingEntity entity) {
-		return maxJumpHeight(((AccessorLivingEntity) entity).invokeGetJumpVelocity());
+		return maxJumpHeight(((AccessorLivingEntity) entity).invokeGetJumpPower());
 	}
 
 	/**

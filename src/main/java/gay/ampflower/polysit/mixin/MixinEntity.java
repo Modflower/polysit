@@ -6,8 +6,8 @@
 
 package gay.ampflower.polysit.mixin;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,9 +21,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Entity.class)
 abstract class MixinEntity {
 	@Shadow
-	public abstract Vec3d getVelocity();
+	public abstract Vec3 getDeltaMovement();
 
-	@Inject(method = "requestTeleportAndDismount", at = @At("RETURN"))
+	@Inject(method = "dismountTo", at = @At("RETURN"))
 	protected void onDismount(double x, double y, double z, CallbackInfo ci) {
 	}
 }

@@ -6,11 +6,11 @@
 
 package gay.ampflower.polysit;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -20,21 +20,21 @@ import java.util.List;
  * @since 0.7.1
  **/
 public class Client implements ClientModInitializer {
-	private static final KeyBinding.Category polysitKeybind = KeyBinding.Category.create(Main.id("gameplay"));
+	private static final KeyMapping.Category polysitKeybind = KeyMapping.Category.register(Main.id("gameplay"));
 
-	private static KeyBinding sitBinding;
+	private static KeyMapping sitBinding;
 
 	@Override
 	public void onInitializeClient() {
 		sitBinding = KeyBindingHelper.registerKeyBinding(
-			new KeyBinding("key.polysit.sit", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_G, polysitKeybind));
+			new KeyMapping("key.polysit.sit", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, polysitKeybind));
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			while (sitBinding.wasPressed()) {
-				final var play = client.getNetworkHandler();
+			while (sitBinding.consumeClick()) {
+				final var play = client.getConnection();
 
-				if (play != null && play.getCommandDispatcher().findNode(List.of("sit")) != null) {
-					play.sendChatCommand("sit");
+				if (play != null && play.getCommands().findNode(List.of("sit")) != null) {
+					play.sendCommand("sit");
 				}
 			}
 		});
