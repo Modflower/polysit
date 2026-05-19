@@ -1,5 +1,7 @@
 import com.modrinth.minotaur.dependencies.DependencyType
 import com.modrinth.minotaur.dependencies.ModDependency
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 plugins {
 	java
@@ -81,8 +83,10 @@ tasks {
 			else -> "release"
 		})
 		val ref = System.getenv("GITHUB_REF")
-//		changelog.set(System.getenv("CHANGELOG") ?: if (ref != null && ref.startsWith("refs/tags/")) "You may view the changelog at https://github.com/the-glitch-network/polysit/releases/tag/${com.google.common.net.UrlEscapers.urlFragmentEscaper().escape(ref.substring(10))}"
-//		else "No changelog is available. Perhaps poke at https://github.com/the-glitch-network/polysit for a changelog?")
+		changelog.set(
+			System.getenv("CHANGELOG") ?: if (ref != null && ref.startsWith("refs/tags/")) "You may view the changelog at https://github.com/Modflower/polysit/releases/tag/${URLEncoder.encode(ref.substring(10), StandardCharsets.UTF_8)}"
+			else "No changelog is available. Perhaps poke at https://github.com/Modflower/polysit for a changelog?"
+		)
 		uploadFile.set(jar.get())
 		gameVersions.set(minecraftCompatible.split(","))
 		loaders.addAll("fabric", "quilt")
