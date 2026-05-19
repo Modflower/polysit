@@ -46,10 +46,10 @@ repositories {
 }
 
 dependencies {
-	minecraft("com.mojang", "minecraft", minecraftVersion)
-	implementation("net.fabricmc", "fabric-loader", loaderVersion)
-	implementation("net.fabricmc.fabric-api", "fabric-api", fabricApiVersion)
-	implementation("eu.pb4", "polymer-core", polymerVersion)
+	minecraft("com.mojang:minecraft:$minecraftVersion")
+	implementation("net.fabricmc:fabric-loader:$loaderVersion")
+	implementation("net.fabricmc.fabric-api:fabric-api:$fabricApiVersion")
+	implementation("eu.pb4:polymer-core:$polymerVersion")
 }
 
 tasks {
