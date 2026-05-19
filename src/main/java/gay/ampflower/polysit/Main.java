@@ -29,7 +29,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
@@ -46,6 +48,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
+
+import java.util.Map;
+import java.util.WeakHashMap;
 
 import static net.minecraft.commands.Commands.literal;
 
@@ -68,6 +73,8 @@ public class Main {
 	static final String VERSION_TAG_NAME = "polysit:runtimeVersion";
 	static final int RUNTIME_VERSION;
 	private static final double[] OFFSET_DELTA = { 0, UPDATE_HEIGHT_OFFSET };
+
+	private static final Map<Player, SeatEntity> seatMap = new WeakHashMap<>();
 
 	static {
 		final var currentVersion = SharedConstants.WORLD_VERSION;
@@ -130,9 +137,26 @@ public class Main {
 	 */
 	public static void main() {
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
-			if (!world.isClientSide() && hand == InteractionHand.MAIN_HAND
-				&& (player.onGround() || player.isPassenger() || player.isCreative())
-				&& player.getItemInHand(hand).isEmpty() && hitResult.getDirection() != Direction.DOWN
+			if (world.isClientSide()) {
+				return InteractionResult.PASS;
+			}
+
+			if (hand == InteractionHand.OFF_HAND) {
+				final var seat = seatMap.remove(player);
+
+				if (seat == null || !seat.isAlive()) {
+					return InteractionResult.PASS;
+				}
+
+				player.startRiding(seat);
+
+				return InteractionResult.CONSUME;
+			}
+
+			if ((player.onGround() || player.isPassenger() || player.isCreative())
+				&& player.getItemInHand(hand).isEmpty()
+				&& hitResult.getDirection() != Direction.DOWN
+				&& !isInCombat(player)
 			) {
 				var pos = hitResult.getBlockPos();
 
@@ -195,7 +219,7 @@ public class Main {
 				double y = ground + VERTICAL_SOLID_OFFSET;
 				double z = entity.getZ();
 
-				if (sit(world, entity, x, y, z, ground).consumesAction()) {
+				if (sit(world, entity, x, y, z, ground, true).consumesAction()) {
 					return Command.SINGLE_SUCCESS;
 				}
 
@@ -204,6 +228,16 @@ public class Main {
 				return 0;
 			}));
 		});
+	}
+
+	private static boolean isInCombat(Player player) {
+		final LivingEntity lastAttacker = player.getLastHurtByMob();
+		if (lastAttacker != null && lastAttacker.isAlive()) {
+			return true;
+		}
+
+		final LivingEntity lastAttacked = player.getLastHurtMob();
+		return lastAttacked != null && lastAttacked.isAlive();
 	}
 
 	public static double getEffectiveEntityY(Entity entity) {
@@ -260,14 +294,14 @@ public class Main {
 			double x = pos.getX() + HORIZONTAL_CENTER_OFFSET + ((direction.getStepX() + corner.getX()) * .2D);
 			double y = pos.getY() + VERTICAL_SLAB_OFFSET;
 			double z = pos.getZ() + HORIZONTAL_CENTER_OFFSET + ((direction.getStepZ() + corner.getZ()) * .2D);
-			return sit(world, entity, x, y, z, minY);
+			return sit(world, entity, x, y, z, minY, command);
 		}
 
 		if (state.getBlock() instanceof SlabBlock && state.getValue(SlabBlock.TYPE) == SlabType.BOTTOM) {
 			double x = pos.getX() + HORIZONTAL_CENTER_OFFSET;
 			double y = pos.getY() + VERTICAL_SLAB_OFFSET;
 			double z = pos.getZ() + HORIZONTAL_CENTER_OFFSET;
-			return sit(world, entity, x, y, z, minY);
+			return sit(world, entity, x, y, z, minY, command);
 		}
 
 		if (state.getBlock() instanceof BedBlock && !maySleep(entity, pos)) {
@@ -307,26 +341,27 @@ public class Main {
 			double x = pos.getX() + HORIZONTAL_CENTER_OFFSET;
 			double y = pos.getY() + getTopHeight(world, state, pos, entity) + VERTICAL_SOLID_OFFSET;
 			double z = pos.getZ() + HORIZONTAL_CENTER_OFFSET;
-			return sit(world, entity, x, y, z, minY);
+			return sit(world, entity, x, y, z, minY, command);
 		}
 
 		if (command && (state.getBlock() instanceof FenceBlock || state.getBlock() instanceof FenceGateBlock)) {
 			double x = pos.getX() + HORIZONTAL_CENTER_OFFSET;
 			double y = pos.getY() + VERTICAL_FENCE_OFFSET;
 			double z = pos.getZ() + HORIZONTAL_CENTER_OFFSET;
-			return sit(world, entity, x, y, z, minY);
+			return sit(world, entity, x, y, z, minY, command);
 		}
 
 		return InteractionResult.PASS;
 	}
 
 	public static InteractionResult sit(
-		Level world,
-		Entity entity,
-		double seatX,
-		double seatY,
-		double seatZ,
-		double minY
+		final @NotNull Level world,
+		final @NotNull Entity entity,
+		final double seatX,
+		final double seatY,
+		final double seatZ,
+		final double minY,
+		final boolean command
 	) {
 		var seat = new SeatEntity(world, seatX, seatY, seatZ);
 
@@ -340,9 +375,13 @@ public class Main {
 			return InteractionResult.FAIL;
 		}
 
-		entity.startRiding(seat);
+		if (command || entity.getClass() != ServerPlayer.class) {
+			entity.startRiding(seat);
+		} else {
+			seatMap.put((ServerPlayer) entity, seat);
+		}
 
-		return InteractionResult.SUCCESS;
+		return InteractionResult.SUCCESS_SERVER;
 	}
 
 	public static <T extends Entity> EntityType<T> registerEntity(String id, EntityType.Builder<T> type) {

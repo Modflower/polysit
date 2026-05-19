@@ -9,7 +9,7 @@ pluginManagement {
 		gradlePluginPortal()
 	}
 	plugins {
-		id("net.fabricmc.fabric-loom-remap") version System.getProperty("loomVersion")!!
+		id("net.fabricmc.fabric-loom") version System.getProperty("loomVersion")!!
 		id("com.modrinth.minotaur") version System.getProperty("minotaurVersion")!!
 	}
 }

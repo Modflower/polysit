@@ -9,7 +9,7 @@ package gay.ampflower.polysit;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import org.lwjgl.glfw.GLFW;
 
@@ -26,7 +26,7 @@ public class Client implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		sitBinding = KeyBindingHelper.registerKeyBinding(
+		sitBinding = KeyMappingHelper.registerKeyMapping(
 			new KeyMapping("key.polysit.sit", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, polysitKeybind));
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
