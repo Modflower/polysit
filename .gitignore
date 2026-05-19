@@ -1,4 +1,105 @@
-run
-build
-.gradle
-.idea
+### Repo-made Junk
+
+## Java
+
+hs_err_*.log
+replay_*.log
+*.hprof
+*.jfr
+
+## Minecraft
+
+# I once found random log files in someone's repo...
+*.log
+*.log.gz
+*.dat
+crash-*.txt
+disconnect-*.txt
+
+## Gradle
+
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+## Loom
+
+run/
+remappedSrc/
+
+## Stonecutter
+
+# We treat versions/ as an implementation detail.
+# The authoritative files are INIs, and any per-version properties must go there.
+/versions/
+
+# Generated Manifold file; is not necessary to commit.
+build.properties
+
+## Custom
+
+generated/
+.local/
+tmp/
+
+
+### OSes
+
+## MacOS
+
+*.DS_Store
+
+## Windows
+
+# Note: we can't flat-deny .ini as we use it.
+desktop.ini
+# Hello Windows XP
+Thumbs.db
+ehthumbs.tb
+
+## Freedesktop.org
+.directory
+
+
+### IDEs
+
+## IntelliJ
+
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+## Eclipse
+
+.apt_generated
+.classpath
+.factorypath
+*.launch
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+## NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+## VSCode
+
+.vscode/
+
+## Generic
+
+classes/
