@@ -136,6 +136,8 @@ public class Main {
 	 * Setups a {@link UseBlockCallback} to allow for one to sit on stairs & slabs.
 	 */
 	public static void main() {
+		Config.init();
+
 		UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
 			if (world.isClientSide()) {
 				return InteractionResult.PASS;
@@ -160,7 +162,7 @@ public class Main {
 			) {
 				var pos = hitResult.getBlockPos();
 
-				if (hitResult.distanceTo(player) > 5 * 5) {
+				if (hitResult.distanceTo(player) > Mth.square(Config.reach)) {
 					return InteractionResult.PASS;
 				}
 
