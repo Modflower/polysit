@@ -9,8 +9,12 @@ package gay.ampflower.polysit;// Created 2022-08-05T21:27:35
 import eu.pb4.polymer.core.api.entity.PolymerEntity;
 import net.fabricmc.fabric.api.networking.v1.context.PacketContext;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
@@ -48,6 +52,11 @@ import static net.minecraft.world.entity.decoration.ArmorStand.DATA_CLIENT_FLAGS
  * @since 0.0.0
  **/
 public class SeatEntity extends Entity implements PolymerEntity {
+	private static final ResourceKey<EntityType<?>> ARMOR_STAND = ResourceKey.create(
+		Registries.ENTITY_TYPE,
+		Identifier.withDefaultNamespace("armor_stand")
+	);
+
 	private static final AttributeInstance MAX_HEALTH_NULL = new AttributeInstance(
 		Attributes.MAX_HEALTH, discard -> {
 			});
@@ -77,7 +86,10 @@ public class SeatEntity extends Entity implements PolymerEntity {
 	 */
 	@Override
 	public EntityType<?> getPolymerEntityType(final PacketContext context) {
-		return EntityType.ARMOR_STAND;
+		return this.registryAccess()
+			.get(ARMOR_STAND)
+			.<EntityType<?>>map(Holder.Reference::value)
+			.orElseGet(() -> Main.SEAT);
 	}
 
 	/**
